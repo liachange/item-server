@@ -5,7 +5,7 @@ import (
 	v1 "item-server/app/http/controllers/api/v1"
 	"item-server/app/models/user"
 	"item-server/app/requests"
-	"net/http"
+	"item-server/pkg/response"
 )
 
 // SignupController 注册控制器
@@ -23,7 +23,7 @@ func (sc *SignupController) IsPhoneExist(c *gin.Context) {
 	}
 
 	//  检查数据库并返回响应
-	c.JSON(http.StatusOK, gin.H{
+	response.JSON(c, gin.H{
 		"exist": user.IsPhoneExist(request.Phone),
 	})
 }
@@ -36,7 +36,8 @@ func (sc *SignupController) IsEmailExist(c *gin.Context) {
 	if ok := requests.Validate(c, &request, requests.SignupEmailExist); !ok {
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
+	//  检查数据库并返回响应
+	response.JSON(c, gin.H{
 		"exist": user.IsEmailExist(request.Email),
 	})
 }
