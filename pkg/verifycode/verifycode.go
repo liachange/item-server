@@ -1,10 +1,12 @@
 package verifycode
 
 import (
+	"fmt"
 	"item-server/pkg/app"
 	"item-server/pkg/config"
 	"item-server/pkg/helpers"
 	"item-server/pkg/logger"
+	"item-server/pkg/mail"
 	"item-server/pkg/redis"
 	"item-server/pkg/sms"
 	"strings"
@@ -66,6 +68,34 @@ func (vc *VerifyCode) CheckAnswer(key string, answer string) bool {
 	}
 
 	return vc.Store.Verify(key, answer, false)
+}
+
+// SendEmail 发送邮件验证码，调用示例：
+//
+//	verifycode.NewVerifyCode().SendEmail(request.Email)
+func (vc *VerifyCode) SendEmail(email string) error {
+
+	// 生成验证码
+	code := vc.generateVerifyCode(email)
+
+	// 方便本地和 API 自动测试
+	if !app.IsProduction() && strings.HasSuffix(email, config.GetString("verifycode.debug_email_suffix")) {
+		return nil
+	}
+
+	content := fmt.Sprintf("<h1>您的 Email 验证码是 %v </h1>", code)
+	// 发送邮件
+	mail.NewMailer().Send(mail.Email{
+		From: mail.From{
+			Address: config.GetString("mail.from.address"),
+			Name:    config.GetString("mail.from.name"),
+		},
+		To:      []string{email},
+		Subject: "Email 验证码",
+		HTML:    []byte(content),
+	})
+
+	return nil
 }
 
 // generateVerifyCode 生成验证码，并放置于 Redis 中

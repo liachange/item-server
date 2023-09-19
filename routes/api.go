@@ -22,7 +22,10 @@ func RegisterAPIRoutes(r *gin.Engine) {
 			vcc := new(auth.VerifyCodeController)
 			// 图片验证码，需要加限流
 			authGroup.POST("/verify-codes/captcha", vcc.ShowCaptcha)
+			// 手机短信验证码
 			authGroup.POST("/verify-codes/phone", vcc.SendUsingPhone)
+			// 邮箱验证码
+			authGroup.POST("/verify-codes/email", vcc.SendUsingEmail)
 		}
 	}
 }
