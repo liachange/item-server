@@ -1,6 +1,9 @@
 package app
 
-import "item-server/pkg/config"
+import (
+	"item-server/pkg/config"
+	"time"
+)
 
 func IsLocal() bool {
 	return config.Get("app.env") == "local"
@@ -12,4 +15,10 @@ func IsProduction() bool {
 
 func IsTesting() bool {
 	return config.Get("app.env") == "testing"
+}
+
+// TimeNowInTimezone 获取当前时间，支持时区
+func TimeNowInTimezone() time.Time {
+	chinaTimezone, _ := time.LoadLocation(config.GetString("app.timezone"))
+	return time.Now().In(chinaTimezone)
 }
