@@ -18,6 +18,7 @@ func RegisterAPIRoutes(r *gin.Engine) {
 			authGroup.POST("/signup/phone/exist", suc.IsPhoneExist)
 			// 判断 Email 是否已注册
 			authGroup.POST("/signup/email/exist", suc.IsEmailExist)
+
 			// 发送验证码
 			vcc := new(auth.VerifyCodeController)
 			// 图片验证码，需要加限流
@@ -30,6 +31,7 @@ func RegisterAPIRoutes(r *gin.Engine) {
 			authGroup.POST("/signup/using-phone", suc.SignupUsingPhone)
 			//邮箱注册
 			authGroup.POST("/signup/using-email", suc.SignupUsingEmail)
+
 			lgc := new(auth.LoginController)
 			// 使用手机号，短信验证码进行登录
 			authGroup.POST("/login/using-phone", lgc.LoginByPhone)
@@ -38,6 +40,9 @@ func RegisterAPIRoutes(r *gin.Engine) {
 			//刷新令牌
 			authGroup.POST("/login/refresh-token", lgc.RefreshToken)
 
+			// 重置密码
+			pwc := new(auth.PasswordController)
+			authGroup.POST("/password-reset/using-phone", pwc.ResetByPhone)
 		}
 	}
 }
