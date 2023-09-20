@@ -29,7 +29,7 @@ type JWT struct {
 // UserInfo 自定义用户信息
 type UserInfo struct {
 	UserID   string `json:"user_id"`
-	UserName string `json:"user_name"`
+	Nickname string `json:"nickname"`
 }
 
 // CustomJWTClaims 自定义Payload信息
@@ -126,7 +126,7 @@ func (jwt *JWT) IssueToken(info UserInfo) string {
 		// 用户信息
 		UserInfo: UserInfo{
 			UserID:   info.UserID,
-			UserName: info.UserName,
+			Nickname: info.Nickname,
 		},
 		// 过期时间
 		ExpireAtTime: expireTime.Unix(),
