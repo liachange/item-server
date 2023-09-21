@@ -53,18 +53,8 @@ func (ctrl *{{StructNamePlural}}Controller) Update(c *gin.Context) {
         return
     }
 
-    if ok := policies.CanModify{{StructName}}(c, {{VariableName}}Model); !ok {
-        response.Abort403(c)
-        return
-    }
-
     request := requests.{{StructName}}Request{}
-    bindOk, errs := requests.Validate(c, &request, requests.{{StructName}}Save)
-    if !bindOk {
-        return
-    }
-    if len(errs) > 0 {
-        response.ValidationError(c, errs)
+    if ok := requests.Validate(c, &request, requests.{{StructName}}Save); !ok {
         return
     }
 

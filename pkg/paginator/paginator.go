@@ -14,12 +14,12 @@ import (
 
 // Paging 分页数据
 type Paging struct {
-	CurrentPage int    // 当前页
-	PerPage     int    // 每页条数
-	TotalPage   int    // 总页数
-	TotalCount  int64  // 总条数
-	NextPageURL string // 下一页的链接
-	PrevPageURL string // 上一页的链接
+	CurrentPage int    `json:"current_page,omitempty"`  // 当前页
+	PerPage     int    `json:"per_page,omitempty"`      // 每页条数
+	TotalPage   int    `json:"total_page,omitempty"`    // 总页数
+	TotalCount  int64  `json:"total_count,omitempty"`   // 总条数
+	NextPageURL string `json:"next_page_url,omitempty"` // 下一页的链接
+	PrevPageURL string `json:"prev_page_url,omitempty"` // 上一页的链接
 }
 
 // Paginator 分页操作类
