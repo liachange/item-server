@@ -40,7 +40,7 @@ func main() {
 			//bootstrap.SetupRedis()
 
 			// 初始化缓存
-			bootstrap.SetupCache()
+			//bootstrap.SetupCache()
 		},
 	}
 
@@ -50,6 +50,7 @@ func main() {
 		cmd.CmdAppKey,
 		cmd.CmdPlay,
 		make.CmdMake,
+		cmd.CmdCache,
 	)
 
 	// 配置默认运行 Web 服务
