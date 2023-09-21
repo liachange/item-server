@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/spf13/cobra"
 	"item-server/app/cmd"
+	"item-server/app/cmd/make"
 	"item-server/bootstrap"
 	btsConfig "item-server/config"
 	"item-server/pkg/config"
@@ -19,7 +20,7 @@ func init() {
 func main() {
 	// 应用的主入口，默认调用 cmd.CmdServe 命令
 	var rootCmd = &cobra.Command{
-		Use:   "Gohub",
+		Use:   "item-server",
 		Short: "A simple forum project",
 		Long:  `Default will run "serve" command, you can use "-h" flag to see all subcommands`,
 
@@ -47,6 +48,7 @@ func main() {
 		cmd.CmdServe,
 		cmd.CmdAppKey,
 		cmd.CmdPlay,
+		make.CmdMake,
 	)
 
 	// 配置默认运行 Web 服务
