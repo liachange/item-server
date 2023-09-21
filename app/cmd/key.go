@@ -6,7 +6,7 @@ import (
 	"item-server/pkg/helpers"
 )
 
-var CmdKey = &cobra.Command{
+var CmdAppKey = &cobra.Command{
 	Use:   "key",
 	Short: "Generate App Key, will print the generated Key",
 	Run:   runKeyGenerate,
