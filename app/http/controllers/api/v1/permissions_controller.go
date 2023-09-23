@@ -37,7 +37,7 @@ func (ctrl *PermissionsController) Show(c *gin.Context) {
 func (ctrl *PermissionsController) Store(c *gin.Context) {
 
 	request := requests.PermissionRequest{}
-	if ok := requests.Validate(c, &request, requests.PermissionSave); !ok {
+	if ok := requests.Validate(c, &request, requests.PermissionCreate); !ok {
 		return
 	}
 
