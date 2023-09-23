@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
+	"item-server/app/models/role_has_permission"
 )
 
 var CmdPlay = &cobra.Command{
@@ -16,4 +18,17 @@ func runPlay(cmd *cobra.Command, args []string) {
 	//redis.Redis.Set("hello", "hi from redis", 10*time.Second)
 	// 从 redis 里取出
 	//console.Success(redis.Redis.Get("hello"))
+	permKey := []uint64{2, 3, 4, 5}
+	var roleHasPermissions []*role_has_permission.RoleHasPermission
+	for _, v := range permKey {
+		row := &role_has_permission.RoleHasPermission{
+			PermissionID: v,
+			RoleID:       3,
+		}
+		roleHasPermissions = append(roleHasPermissions, row)
+	}
+	fmt.Println(&roleHasPermissions)
+	//result := database.DB.Create(roleHasPermissions)
+	//console.Success(cast.ToString(result.RowsAffected))
+
 }

@@ -58,6 +58,7 @@ func RegisterAPIRoutes(r *gin.Engine) {
 			//邮箱找回密码
 			authGroup.POST("/password-reset/using-email", middlewares.GuestJWT(), pwc.ResetByEmail)
 
+			//权限
 			pmc := new(controllers.PermissionsController)
 			pmcGroup := v1.Group("/permissions")
 			{
@@ -66,6 +67,17 @@ func RegisterAPIRoutes(r *gin.Engine) {
 				pmcGroup.PUT("/:id", middlewares.AuthJWT(), pmc.Update)
 				pmcGroup.DELETE("/:id", middlewares.AuthJWT(), pmc.Delete)
 				pmcGroup.GET("/:id", middlewares.AuthJWT(), pmc.Show)
+			}
+
+			//角色
+			rc := new(controllers.RolesController)
+			rcGroup := v1.Group("/roles")
+			{
+				rcGroup.GET("", middlewares.AuthJWT(), rc.Index)
+				rcGroup.POST("", middlewares.AuthJWT(), rc.Store)
+				rcGroup.PUT("/:id", middlewares.AuthJWT(), rc.Update)
+				rcGroup.DELETE("/:id", middlewares.AuthJWT(), rc.Delete)
+				rcGroup.GET("/:id", middlewares.AuthJWT(), rc.Show)
 			}
 		}
 	}

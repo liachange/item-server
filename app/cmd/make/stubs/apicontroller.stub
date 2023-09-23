@@ -2,7 +2,6 @@ package v1
 
 import (
     "item-server/app/models/{{PackageName}}"
-    "item-server/app/policies"
     "item-server/app/requests"
     "item-server/pkg/response"
 
