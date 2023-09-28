@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"github.com/spf13/cast"
 	"item-server/app/models/permission"
 	"item-server/app/models/role"
 	"item-server/app/requests"
@@ -26,8 +27,8 @@ func (ctrl *RolesController) Index(c *gin.Context) {
 }
 
 func (ctrl *RolesController) Show(c *gin.Context) {
-	roleModel := role.Get(c.Param("id"))
-
+	//roleModel := role.Get(c.Param("id"))
+	roleModel := role.KeyFirstPreload(cast.ToUint64(c.Param("id")))
 	if roleModel.ID == 0 {
 		response.Abort404(c)
 		return
@@ -59,7 +60,7 @@ func (ctrl *RolesController) Store(c *gin.Context) {
 
 func (ctrl *RolesController) Update(c *gin.Context) {
 
-	roleModel := role.First(c.Param("id"))
+	roleModel := role.KeyFirst(cast.ToUint64(c.Param("id")))
 	if roleModel.ID == 0 {
 		response.Abort404(c)
 		return

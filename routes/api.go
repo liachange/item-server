@@ -79,6 +79,16 @@ func RegisterAPIRoutes(r *gin.Engine) {
 				rcGroup.DELETE("/:id", middlewares.AuthJWT(), rc.Delete)
 				rcGroup.GET("/:id", middlewares.AuthJWT(), rc.Show)
 			}
+			//账户
+			uc := new(controllers.UsersController)
+			ucGroup := v1.Group("/users")
+			{
+				ucGroup.GET("", middlewares.AuthJWT(), uc.Index)
+				ucGroup.POST("", middlewares.AuthJWT(), uc.Store)
+				ucGroup.PUT("/:id", middlewares.AuthJWT(), uc.Update)
+				ucGroup.DELETE("/:id", middlewares.AuthJWT(), uc.Delete)
+				ucGroup.GET("/:id", middlewares.AuthJWT(), uc.Show)
+			}
 		}
 	}
 }

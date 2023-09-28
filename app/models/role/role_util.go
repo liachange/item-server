@@ -15,7 +15,15 @@ func Get(idstr string) (role Role) {
 	}).First(&role, idstr)
 	return
 }
-func First(id string) (role Role) {
+
+func KeyFirstPreload(id uint64) (role Role) {
+	database.DB.Preload("Permissions", func(tx *gorm.DB) *gorm.DB {
+		return tx.Select("id,name")
+	}).First(&role, id)
+	return
+}
+
+func KeyFirst(id uint64) (role Role) {
 	database.DB.First(&role, id)
 	return
 }
