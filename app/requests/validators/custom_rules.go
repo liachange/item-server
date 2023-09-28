@@ -3,8 +3,10 @@ package validators
 import (
 	"errors"
 	"fmt"
+	"github.com/spf13/cast"
 	"github.com/thedevsaddam/govalidator"
 	"item-server/pkg/database"
+	"item-server/pkg/helpers"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -27,9 +29,9 @@ func init() {
 		dbFiled := rng[1]
 
 		// 第三个参数，排除 ID
-		var exceptID string
+		var exceptID uint64
 		if len(rng) > 2 {
-			exceptID = rng[2]
+			exceptID = cast.ToUint64(rng[2])
 		}
 
 		// 用户请求过来的数据
@@ -39,7 +41,7 @@ func init() {
 		query := database.DB.Table(tableName).Where(dbFiled+" = ?", requestValue)
 
 		// 如果传参第三个参数，加上 SQL Where 过滤
-		if len(exceptID) > 0 {
+		if exceptID > 0 {
 			query.Where("id != ?", exceptID)
 		}
 
@@ -113,6 +115,97 @@ func init() {
 				return errors.New(message)
 			}
 			return fmt.Errorf("%v 不存在", requestValue)
+		}
+		return nil
+	})
+	// 自定义规则 exist_key，确保数据库存在某条数据
+	// id 的值在数据库中存在，即可使用：
+	// exist_key:categories
+	govalidator.AddCustomRule("exist_key", func(field string, rule string, message string, value interface{}) error {
+		// 第一个参数，表名称，如 categories
+		tableName := strings.TrimPrefix(rule, "exist_key:")
+
+		// 用户请求过来的数据
+		requestValue := value.([]uint64)
+		if len(requestValue) == 0 {
+			return errors.New(message)
+		}
+
+		// 查询数据库
+		var count int64
+		database.DB.Table(tableName).Where("id in ?", requestValue).Count(&count)
+		// 验证不通过，数据不存在
+		if cast.ToInt(count) != len(requestValue) {
+			// 如果有自定义错误消息的话，使用自定义消息
+			return errors.New(message)
+		}
+		return nil
+	})
+	// 自定义规则 slice_time，确保该字段为切片并且值为时间戳
+	govalidator.AddCustomRule("slice_time", func(field string, rule string, message string, value interface{}) error {
+		valSlice := strings.Split(value.(string), ",")
+		if len(valSlice) == 2 {
+			for _, v := range valSlice {
+				if len(v) != 10 {
+					return errors.New(message)
+				}
+				str := helpers.TimeStr(cast.ToInt64(v), "second")
+				if strings.Contains(str, "1970-01") {
+					return errors.New(message)
+				}
+			}
+		} else {
+			return errors.New(message)
+		}
+		return nil
+	})
+	// 自定义规则 required_without:foo,bar，确保该字段为切片并且值为时间戳
+	govalidator.AddCustomRule("required_without", func(field string, rule string, message string, value interface{}) error {
+		valSlice := strings.Split(value.(string), ",")
+		if len(valSlice) == 2 {
+			for _, v := range valSlice {
+				if len(v) != 10 {
+					return errors.New(message)
+				}
+				str := helpers.TimeStr(cast.ToInt64(v), "second")
+				if strings.Contains(str, "1970-01") {
+					return errors.New(message)
+				}
+			}
+		} else {
+			return errors.New(message)
+		}
+		return nil
+	})
+	govalidator.AddCustomRule("exist_user", func(field string, rule string, message string, value interface{}) error {
+		rng := strings.Split(strings.TrimPrefix(rule, "exist_user:"), ",")
+
+		// 第一个参数，表名称，如 categories
+		tableName := rng[0]
+		// 用户请求过来的数据
+		requestValue := value.(string)
+		query := database.DB.Table(tableName)
+		if len(rng) == 2 {
+			if cast.ToUint64(rng[1]) > 0 {
+				query.Where("id <> ?", rng[1]).Where(
+					database.DB.Or("phone = ?", requestValue).
+						Or("email = ?", requestValue).
+						Or("name = ?", requestValue),
+				)
+			} else {
+				return errors.New(message)
+			}
+		} else {
+			query.Where("phone = ?", requestValue).
+				Or("email = ?", requestValue).
+				Or("name = ?", requestValue)
+		}
+		// 查询数据库
+		var count int64
+		query.Count(&count)
+		// 数据存在
+		if count != 0 {
+			return errors.New(message)
 		}
 		return nil
 	})

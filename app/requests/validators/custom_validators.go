@@ -28,3 +28,18 @@ func ValidateVerifyCode(key, answer string, errs map[string][]string) map[string
 	}
 	return errs
 }
+
+// ValidateRequiredWithout 自定义规则，验证其中必须有一个有值
+func ValidateRequiredWithout(fields map[string]string, message string, errs map[string][]string) map[string][]string {
+	i := 0
+	for _, v := range fields {
+		if v == "" {
+			i++
+		}
+	}
+	if len(fields) == i {
+		errs["required_without"] = append(errs["required_without"], message)
+	}
+
+	return errs
+}
