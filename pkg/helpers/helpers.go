@@ -3,6 +3,7 @@ package helpers
 import (
 	"crypto/rand"
 	"fmt"
+	"github.com/spf13/cast"
 	"io"
 	mathrand "math/rand"
 	"reflect"
@@ -95,4 +96,96 @@ func RandomString(length int) string {
 	//}
 	//return string(b)
 
+}
+
+// TimeNow 获取系统时间
+func TimeNow() time.Time {
+	return cast.ToTime(time.Now().Format("2006-01-02 15:04:05"))
+}
+
+// TimeUnix 时间字符串转为时间戳
+func TimeUnix(str string) int64 {
+	loc, _ := time.LoadLocation("Asia/Shanghai")
+	tt, _ := time.ParseInLocation("2006-01-02 15:04:05", str, loc)
+	return tt.Unix()
+}
+
+// TimeStr 时间戳转时间字符串
+func TimeStr(unix int64, format string) (formatTimeStr string) {
+	switch format {
+	case "day":
+		formatTimeStr = time.Unix(unix, 0).Format("2006-01-02")
+		return
+	case "second":
+		formatTimeStr = time.Unix(unix, 0).Format("2006-01-02 15:04:05")
+		return
+	default:
+		formatTimeStr = cast.ToString(unix)
+	}
+	return
+}
+
+// TimeFormat 时间格式化
+func TimeFormat(str time.Time, format string) (formatTimeStr string) {
+	switch format {
+	case "day":
+		formatTimeStr = str.Format("2006-01-02")
+		return
+	case "second":
+		formatTimeStr = str.Format("2006-01-02 15:04:05")
+		return
+	default:
+		formatTimeStr = cast.ToString(str)
+	}
+	return
+}
+
+// TimeParse 时间格式验证
+func TimeParse(str string) bool {
+	_, err := time.Parse("2006-01-02 15:04:05", str)
+	if err == nil {
+		return true
+	}
+	return false
+}
+
+// ReqSelect 更新过滤
+func ReqSelect(obj interface{}) []string {
+	var str []string
+	v := reflect.ValueOf(obj)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	t := v.Type()
+	for i := 0; i < v.NumField(); i++ {
+		tagValue := t.Field(i).Tag.Get("select")
+		if tagValue != "" {
+			value := v.Field(i).Interface()
+			if !Empty(value) {
+				str = append(str, tagValue)
+			}
+		}
+	}
+
+	return str
+}
+
+func ReqFilter(req interface{}) map[string]interface{} {
+	m := make(map[string]interface{})
+	v := reflect.ValueOf(req)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	t := v.Type()
+	for i := 0; i < v.NumField(); i++ {
+		tagValue := t.Field(i).Tag.Get("filter")
+		if tagValue != "" {
+			value := v.Field(i).Interface()
+			if !Empty(value) {
+				m[tagValue] = value
+			}
+		}
+	}
+	fmt.Println(m)
+	return m
 }
