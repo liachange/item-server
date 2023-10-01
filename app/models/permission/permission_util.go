@@ -10,27 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func Get(idstr string) (permission Permission) {
-	database.DB.Where("id", idstr).First(&permission)
-	return
-}
-
-func GetBy(field, value string) (permission Permission) {
-	database.DB.Where("? = ?", field, value).First(&permission)
-	return
-}
-
-func All() (permissions []Permission) {
-	database.DB.Find(&permissions)
-	return
-}
-
-func IsExist(field, value string) bool {
-	var count int64
-	database.DB.Model(Permission{}).Where("? = ?", field, value).Count(&count)
-	return count > 0
-}
-
 // FirstById 通过id获取详细
 func FirstById(id uint64) (perm Permission) {
 	database.DB.First(&perm, id)
