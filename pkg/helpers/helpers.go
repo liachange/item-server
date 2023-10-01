@@ -151,7 +151,7 @@ func TimeParse(str string) bool {
 
 // ReqSelect 更新过滤
 func ReqSelect(obj interface{}) []string {
-	var str []string
+	str := make([]string, 0)
 	v := reflect.ValueOf(obj)
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()
@@ -166,12 +166,12 @@ func ReqSelect(obj interface{}) []string {
 			}
 		}
 	}
-
+	fmt.Println(str)
 	return str
 }
 
 func ReqFilter(req interface{}) map[string]interface{} {
-	m := make(map[string]interface{})
+	m := make(map[string]interface{}, 0)
 	v := reflect.ValueOf(req)
 	if v.Kind() == reflect.Ptr {
 		v = v.Elem()

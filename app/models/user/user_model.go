@@ -28,13 +28,6 @@ type User struct {
 	models.CommonTimestampsField
 }
 
-type UserCollection struct {
-	ID        uint64 `json:"id,omitempty"`
-	State     uint8  `json:"state,omitempty"`
-	CreatedAt string `json:"created_at,omitempty"`
-	UpdatedAt string `json:"updated_at,omitempty"`
-}
-
 // Create 创建用户，通过 User.ID 来判断是否创建成功
 func (userModel *User) Create() {
 	database.DB.Create(&userModel)

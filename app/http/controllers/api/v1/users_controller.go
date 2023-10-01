@@ -3,7 +3,7 @@ package v1
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cast"
-	v1 "item-server/app/http/Resources/api/v1"
+	v1 "item-server/app/http/resources/api/v1"
 	"item-server/app/models/user"
 	"item-server/app/requests"
 	"item-server/pkg/hash"
