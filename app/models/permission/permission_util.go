@@ -10,8 +10,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// FirstById 通过id获取详细
-func FirstById(id uint64) (perm Permission) {
+// FindById 通过id获取详细
+func FindById(id uint64) (perm Permission) {
 	database.DB.First(&perm, id)
 	return
 }

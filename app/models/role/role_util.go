@@ -11,14 +11,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// FirstById 通过id获取详细
-func FirstById(id uint64) (role Role) {
+// FindById 通过id获取详细
+func FindById(id uint64) (role Role) {
 	database.DB.First(&role, id)
 	return
 }
 
-// FirstPreloadById 通过主键获取详细并加载关联
-func FirstPreloadById(id uint64) (role Role) {
+// FindPreloadById 通过主键获取详细并加载关联
+func FindPreloadById(id uint64) (role Role) {
 	database.DB.Preload("Permissions", func(tx *gorm.DB) *gorm.DB {
 		return tx.Select("id,name,guard_name")
 	}).First(&role, id)

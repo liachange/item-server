@@ -33,7 +33,7 @@ func (ctrl *UsersController) Index(c *gin.Context) {
 }
 
 func (ctrl *UsersController) Show(c *gin.Context) {
-	userModel := user.FirstById(cast.ToUint64(c.Param("id")))
+	userModel := user.FindById(cast.ToUint64(c.Param("id")))
 	if userModel.ID == 0 {
 		response.Abort404(c)
 		return
@@ -66,7 +66,7 @@ func (ctrl *UsersController) Store(c *gin.Context) {
 
 func (ctrl *UsersController) Update(c *gin.Context) {
 
-	userModel := user.FirstById(cast.ToUint64(c.Param("id")))
+	userModel := user.FindById(cast.ToUint64(c.Param("id")))
 	if userModel.ID == 0 {
 		response.Abort404(c)
 		return
@@ -88,7 +88,7 @@ func (ctrl *UsersController) Update(c *gin.Context) {
 	}
 	rowsAffected := userModel.SaveMany(&request, request.Role)
 	if rowsAffected > 0 {
-		response.Data(c, resources.UserShowResource(user.FirstPreloadById(userModel.ID)))
+		response.Data(c, resources.UserShowResource(user.FindPreloadById(userModel.ID)))
 	} else {
 		response.Abort500(c, "更新失败，请稍后尝试~")
 	}
@@ -96,7 +96,7 @@ func (ctrl *UsersController) Update(c *gin.Context) {
 
 func (ctrl *UsersController) Delete(c *gin.Context) {
 
-	userModel := user.FirstById(cast.ToUint64(c.Param("id")))
+	userModel := user.FindById(cast.ToUint64(c.Param("id")))
 	if userModel.ID == 0 {
 		response.Abort404(c)
 		return

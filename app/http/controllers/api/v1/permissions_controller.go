@@ -35,7 +35,7 @@ func (ctrl *PermissionsController) Index(c *gin.Context) {
 }
 
 func (ctrl *PermissionsController) Show(c *gin.Context) {
-	permissionModel := permission.FirstById(cast.ToUint64(c.Param("id")))
+	permissionModel := permission.FindById(cast.ToUint64(c.Param("id")))
 	if permissionModel.ID == 0 {
 		response.Abort404(c)
 		return
@@ -71,7 +71,7 @@ func (ctrl *PermissionsController) Store(c *gin.Context) {
 
 func (ctrl *PermissionsController) Update(c *gin.Context) {
 
-	permissionModel := permission.FirstById(cast.ToUint64(c.Param("id")))
+	permissionModel := permission.FindById(cast.ToUint64(c.Param("id")))
 	if permissionModel.ID == 0 {
 		response.Abort404(c)
 		return
@@ -103,7 +103,7 @@ func (ctrl *PermissionsController) Update(c *gin.Context) {
 
 func (ctrl *PermissionsController) Delete(c *gin.Context) {
 
-	permissionModel := permission.FirstById(cast.ToUint64(c.Param("id")))
+	permissionModel := permission.FindById(cast.ToUint64(c.Param("id")))
 	if permissionModel.ID == 0 {
 		response.Abort404(c)
 		return

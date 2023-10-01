@@ -41,17 +41,6 @@ func GetByMulti(loginID string) (userModel User) {
 	return
 }
 
-// NameIsExist 账户是否已经存在
-func NameIsExist(name string) int64 {
-	var count int64
-	database.DB.
-		Where("phone = ?", name).
-		Or("email = ?", name).
-		Or("name = ?", name).
-		Count(&count)
-	return count
-}
-
 // Get 通过 ID 获取用户
 func Get(idstr string) (userModel User) {
 	database.DB.Where("id", idstr).First(&userModel)
@@ -64,14 +53,14 @@ func GetByEmail(email string) (userModel User) {
 	return
 }
 
-// FirstById 通过id获取详细
-func FirstById(id uint64) (user User) {
+// FindById 通过id获取详细
+func FindById(id uint64) (user User) {
 	database.DB.First(&user, id)
 	return
 }
 
-// FirstPreloadById 通过主键获取详细并加载关联
-func FirstPreloadById(id uint64) (user User) {
+// FindPreloadById 通过主键获取详细并加载关联
+func FindPreloadById(id uint64) (user User) {
 	database.DB.Preload("Role").First(&user, id)
 	return
 }

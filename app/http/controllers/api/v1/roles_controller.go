@@ -34,7 +34,7 @@ func (ctrl *RolesController) Index(c *gin.Context) {
 }
 
 func (ctrl *RolesController) Show(c *gin.Context) {
-	roleModel := role.FirstPreloadById(cast.ToUint64(c.Param("id")))
+	roleModel := role.FindPreloadById(cast.ToUint64(c.Param("id")))
 	if roleModel.ID == 0 {
 		response.Abort404(c)
 		return
@@ -66,7 +66,7 @@ func (ctrl *RolesController) Store(c *gin.Context) {
 
 func (ctrl *RolesController) Update(c *gin.Context) {
 
-	roleModel := role.FirstById(cast.ToUint64(c.Param("id")))
+	roleModel := role.FindById(cast.ToUint64(c.Param("id")))
 	if roleModel.ID == 0 {
 		response.Abort404(c)
 		return
@@ -94,7 +94,7 @@ func (ctrl *RolesController) Update(c *gin.Context) {
 
 func (ctrl *RolesController) Delete(c *gin.Context) {
 
-	roleModel := role.FirstById(cast.ToUint64(c.Param("id")))
+	roleModel := role.FindById(cast.ToUint64(c.Param("id")))
 	if roleModel.ID == 0 {
 		response.Abort404(c)
 		return
