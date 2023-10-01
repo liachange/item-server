@@ -4,7 +4,7 @@ import (
     "item-server/app/models/{{PackageName}}"
     "item-server/app/requests"
     "item-server/pkg/response"
-
+	"item-server/app/http/resources"
     "github.com/gin-gonic/gin"
 )
 
@@ -13,17 +13,31 @@ type {{StructNamePlural}}Controller struct {
 }
 
 func (ctrl *{{StructNamePlural}}Controller) Index(c *gin.Context) {
-    {{VariableNamePlural}} := {{PackageName}}.All()
-    response.Data(c, {{VariableNamePlural}})
+
+    requestFilter := requests.{{StructName}}FilterRequest{}
+    if ok := requests.Validate(c, &requestFilter, requests.{{StructName}}Filter); !ok {
+        return
+    }
+    request := requests.PaginationRequest{}
+    if ok := requests.Validate(c, &request, requests.Pagination); !ok {
+        return
+    }
+
+    data, pager := {{VariableName}}.Paginate(c, 10, &requestFilter)
+
+    response.JSON(c, gin.H{
+        "data":  resources.{{StructName}}IndexResource(data),
+        "pager": pager,
+    })
 }
 
 func (ctrl *{{StructNamePlural}}Controller) Show(c *gin.Context) {
-    {{VariableName}}Model := {{PackageName}}.Get(c.Param("id"))
+    {{VariableName}}Model := {{PackageName}}.FindById(cast.ToUint64(c.Param("id")))
     if {{VariableName}}Model.ID == 0 {
         response.Abort404(c)
         return
     }
-    response.Data(c, {{VariableName}}Model)
+    response.Data(c, resources.{{StructName}}ShowResource({{VariableName}}Model))
 }
 
 func (ctrl *{{StructNamePlural}}Controller) Store(c *gin.Context) {
@@ -46,7 +60,7 @@ func (ctrl *{{StructNamePlural}}Controller) Store(c *gin.Context) {
 
 func (ctrl *{{StructNamePlural}}Controller) Update(c *gin.Context) {
 
-    {{VariableName}}Model := {{PackageName}}.Get(c.Param("id"))
+    {{VariableName}}Model := {{PackageName}}.FindById(cast.ToUint64(c.Param("id")))
     if {{VariableName}}Model.ID == 0 {
         response.Abort404(c)
         return
@@ -58,7 +72,7 @@ func (ctrl *{{StructNamePlural}}Controller) Update(c *gin.Context) {
     }
 
     {{VariableName}}Model.FieldName = request.FieldName
-    rowsAffected := {{VariableName}}Model.Save()
+    rowsAffected := {{VariableName}}Model.Save(&request)
     if rowsAffected > 0 {
         response.Data(c, {{VariableName}}Model)
     } else {
@@ -68,7 +82,7 @@ func (ctrl *{{StructNamePlural}}Controller) Update(c *gin.Context) {
 
 func (ctrl *{{StructNamePlural}}Controller) Delete(c *gin.Context) {
 
-    {{VariableName}}Model := {{PackageName}}.Get(c.Param("id"))
+    {{VariableName}}Model := {{PackageName}}.FindById(cast.ToUint64(c.Param("id")))
     if {{VariableName}}Model.ID == 0 {
         response.Abort404(c)
         return

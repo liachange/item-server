@@ -1,8 +1,7 @@
-//Package {{PackageName}} 模型
 package {{PackageName}}
 
 import (
-
+    "item-server/pkg/helpers"
     "item-server/pkg/logger"
     "item-server/pkg/database"
 )
@@ -10,6 +9,7 @@ import (
 type {{StructName}} struct {
     models.BaseModel
 
+    State       string `json:"state,omitempty"`
     // Put fields in here
     FIXME()
 
@@ -20,8 +20,8 @@ func ({{VariableName}} *{{StructName}}) Create() {
     database.DB.Create(&{{VariableName}})
 }
 
-func ({{VariableName}} *{{StructName}}) Save() (rowsAffected int64) {
-    result := database.DB.Save(&{{VariableName}})
+func ({{VariableName}} *{{StructName}}) Save(fieldSelect any) (rowsAffected int64) {
+    result := database.DB.Select(helpers.ReqSelect(fieldSelect)).Save(&{{VariableName}})
     return result.RowsAffected
 }
 

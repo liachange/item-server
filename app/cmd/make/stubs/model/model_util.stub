@@ -1,38 +1,36 @@
 package {{PackageName}}
 
 import (
+    "gorm.io/gorm"
     "item-server/pkg/database"
     "item-server/pkg/paginator"
     "item-server/pkg/app"
-
+	"item-server/pkg/filter"
+	"item-server/pkg/helpers"
     "github.com/gin-gonic/gin"
 )
 
-func Get(idstr string) ({{VariableName}} {{StructName}}) {
-    database.DB.Where("id", idstr).First(&{{VariableName}})
-    return
+// FindById 通过id获取详细
+func FindById(id uint64) ({{VariableName}} {{StructName}}) {
+	database.DB.First(&{{VariableName}}, id)
+	return
 }
 
-func GetBy(field, value string) ({{VariableName}} {{StructName}}) {
-    database.DB.Where("? = ?", field, value).First(&{{VariableName}})
-    return
+// FindPreloadById 通过主键获取详细并加载关联
+func FindPreloadById(id uint64) ({{VariableName}} {{StructName}}) {
+	database.DB.Preload("xx", func(tx *gorm.DB) *gorm.DB {
+		return tx.Select("id")
+	}).First(&{{VariableName}}, id)
+	return
 }
 
-func All() ({{VariableNamePlural}} []{{StructName}}) {
-    database.DB.Find(&{{VariableNamePlural}})
-    return
-}
-
-func IsExist(field, value string) bool {
-    var count int64
-    database.DB.Model({{StructName}}{}).Where("? = ?", field, value).Count(&count)
-    return count > 0
-}
-
-func Paginate(c *gin.Context, perPage int) ({{VariableNamePlural}} []{{StructName}}, paging paginator.Paging) {
+func Paginate(c *gin.Context, perPage int,filters any) ({{VariableNamePlural}} []{{StructName}}, paging paginator.Paging) {
+    query := database.DB.Model({{StructName}}{})
+	// 拼接查询语句
+	filter.QueryFilter(query, helpers.ReqFilter(filters))
     paging = paginator.Paginate(
         c,
-        database.DB.Model({{StructName}}{}),
+        query,
         &{{VariableNamePlural}},
         app.V1URL(database.TableName(&{{StructName}}{})),
         perPage,

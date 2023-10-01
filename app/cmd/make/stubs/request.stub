@@ -11,6 +11,12 @@ type {{StructName}}Request struct {
     FIXME()
 }
 
+type {{StructName}}FilterRequest struct {
+	State   uint8  `valid:"state" json:"state,omitempty" form:"state" filter:"state,eq"`
+	BetTime string `valid:"bet_time" json:"bet_time,omitempty" form:"bet_time" filter:"created_at,bet_time"`
+	    FIXME()
+}
+
 func {{StructName}}Save(data interface{}, c *gin.Context) map[string][]string {
 
     rules := govalidator.MapData{
@@ -30,4 +36,21 @@ func {{StructName}}Save(data interface{}, c *gin.Context) map[string][]string {
         // },
     }
     return validate(data, rules, messages)
+}
+
+func {{StructName}}Filter(data interface{}, c *gin.Context) map[string][]string {
+
+	rules := govalidator.MapData{
+		"state":    []string{"in:1,2,3"},
+		"bet_time": []string{"slice_time"},
+	}
+	messages := govalidator.MapData{
+		"state": []string{
+			"in:状态格式不正确",
+		},
+		"bet_time": []string{
+			"slice_time:时间格式不正确",
+		},
+	}
+	return validate(data, rules, messages)
 }

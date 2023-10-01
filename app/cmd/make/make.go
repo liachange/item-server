@@ -74,6 +74,7 @@ func init() {
 		CmdMakeAPIController,
 		CmdMakeRequest,
 		CmdMakePolicy,
+		CmdMakeResource,
 	)
 }
 

@@ -1,0 +1,40 @@
+package resources
+
+import (
+	"item-server/app/models/{{VariableName}}"
+	"item-server/pkg/helpers"
+)
+
+func {{StructName}}IndexResource(models []{{VariableName}}.{{StructName}}) []interface{} {
+	s := make([]interface{}, 0)
+	for _, model := range models {
+		s = append(s, map[string]interface{}{
+			"id":          model.ID,
+			"state":       model.State,
+			"{{VariableName}}s": {{VariableName}}Collection(model.{{StructName}}s),
+			"created_at":  helpers.TimeFormat(model.CreatedAt, "second"),
+			"updated_at":  helpers.TimeFormat(model.UpdatedAt, "second"),
+		})
+	}
+	return s
+}
+
+func {{StructName}}ShowResource(model {{VariableName}}.{{StructName}}) map[string]interface{} {
+	return map[string]interface{}{
+		"id":          model.ID,
+		"state":       model.State,
+		"{{VariableName}}s": {{VariableName}}Collection(model.{{StructName}}s),
+		"created_at":  helpers.TimeFormat(model.CreatedAt, "second"),
+		"updated_at":  helpers.TimeFormat(model.UpdatedAt, "second"),
+	}
+}
+func {{VariableName}}Collection(r []{{VariableName}}.{{StructName}}) []any {
+	s := make([]interface{}, 0)
+	for _, v := range r {
+		m := map[string]interface{}{
+			"id":    v.ID,
+		}
+		s = append(s, m)
+	}
+	return s
+}
