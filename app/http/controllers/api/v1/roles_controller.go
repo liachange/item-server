@@ -2,9 +2,11 @@ package v1
 
 import (
 	"github.com/spf13/cast"
+	"item-server/app/http/resources"
 	"item-server/app/models/permission"
 	"item-server/app/models/role"
 	"item-server/app/requests"
+	"item-server/pkg/helpers"
 	"item-server/pkg/response"
 
 	"github.com/gin-gonic/gin"
@@ -15,25 +17,29 @@ type RolesController struct {
 }
 
 func (ctrl *RolesController) Index(c *gin.Context) {
+	requestFilter := requests.RoleFilterRequest{}
+	if ok := requests.Validate(c, &requestFilter, requests.RoleFilter); !ok {
+		return
+	}
 	request := requests.PaginationRequest{}
 	if ok := requests.Validate(c, &request, requests.Pagination); !ok {
 		return
 	}
-	data, pager := role.Paginate(c, 10)
+
+	data, pager := role.Paginate(c, 10, &requestFilter)
 	response.JSON(c, gin.H{
-		"data":  data,
+		"data":  resources.RoleIndexResource(data),
 		"pager": pager,
 	})
 }
 
 func (ctrl *RolesController) Show(c *gin.Context) {
-	//roleModel := role.Get(c.Param("id"))
-	roleModel := role.KeyFirstPreload(cast.ToUint64(c.Param("id")))
+	roleModel := role.FirstPreloadById(cast.ToUint64(c.Param("id")))
 	if roleModel.ID == 0 {
 		response.Abort404(c)
 		return
 	}
-	response.Data(c, roleModel)
+	response.Data(c, resources.RoleShowResource(roleModel))
 }
 
 func (ctrl *RolesController) Store(c *gin.Context) {
@@ -60,7 +66,7 @@ func (ctrl *RolesController) Store(c *gin.Context) {
 
 func (ctrl *RolesController) Update(c *gin.Context) {
 
-	roleModel := role.KeyFirst(cast.ToUint64(c.Param("id")))
+	roleModel := role.FirstById(cast.ToUint64(c.Param("id")))
 	if roleModel.ID == 0 {
 		response.Abort404(c)
 		return
@@ -77,7 +83,8 @@ func (ctrl *RolesController) Update(c *gin.Context) {
 	roleModel.Title = request.Title
 	roleModel.GuardName = request.Guard
 	roleModel.Description = request.Description
-	rowsAffected := roleModel.SaveMany(perKey)
+	roleModel.UpdatedAt = helpers.TimeNow()
+	rowsAffected := roleModel.SaveMany(&request, perKey)
 	if rowsAffected > 0 {
 		response.Data(c, roleModel)
 	} else {
@@ -87,7 +94,7 @@ func (ctrl *RolesController) Update(c *gin.Context) {
 
 func (ctrl *RolesController) Delete(c *gin.Context) {
 
-	roleModel := role.Get(c.Param("id"))
+	roleModel := role.FirstById(cast.ToUint64(c.Param("id")))
 	if roleModel.ID == 0 {
 		response.Abort404(c)
 		return

@@ -8,6 +8,7 @@ import (
 	"item-server/app/models/permission"
 	"item-server/app/models/role_has_permission"
 	"item-server/pkg/database"
+	"item-server/pkg/helpers"
 )
 
 type Role struct {
@@ -59,9 +60,9 @@ func (role *Role) Save() (rowsAffected int64) {
 	return result.RowsAffected
 }
 
-func (role *Role) SaveMany(permKey []uint64) (row int) {
+func (role *Role) SaveMany(fieldSelect any, permKey []uint64) (row int) {
 	err := database.DB.Transaction(func(tx *gorm.DB) error {
-		if err := (tx.Save(&role)).Error; err != nil {
+		if err := (tx.Select(helpers.ReqSelect(fieldSelect)).Save(&role)).Error; err != nil {
 			return err
 		}
 		if err := (tx.Where("role_id=?", role.ID).Delete(&role_has_permission.RoleHasPermission{})).Error; err != nil {

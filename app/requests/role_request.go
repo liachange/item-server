@@ -6,12 +6,19 @@ import (
 )
 
 type RoleRequest struct {
-	State       string   `valid:"state" json:"state,omitempty"`
-	Name        string   `valid:"name" json:"name,omitempty"`
-	Title       string   `valid:"title" json:"title,omitempty"`
-	Description string   `valid:"description" json:"description,omitempty"`
-	Guard       string   `valid:"guard" json:"guard,omitempty"`
+	State       string   `valid:"state" json:"state,omitempty" select:"state"`
+	Name        string   `valid:"name" json:"name,omitempty" select:"name"`
+	Title       string   `valid:"title" json:"title,omitempty" select:"title"`
+	Description string   `valid:"description" json:"description,omitempty" select:"description"`
+	Guard       string   `valid:"guard" json:"guard,omitempty" select:"guard_name"`
 	Permission  []uint64 `valid:"permission" json:"permission,omitempty"`
+}
+
+type RoleFilterRequest struct {
+	State   uint8  `valid:"state" json:"state,omitempty" form:"state" filter:"state,eq"`
+	Name    string `valid:"name" json:"name,omitempty" form:"name" filter:"name,like"`
+	Title   string `valid:"title" json:"title,omitempty" form:"title" filter:"title,like"`
+	BetTime string `valid:"bet_time" json:"bet_time,omitempty" form:"bet_time" filter:"created_at,bet_time"`
 }
 
 func RoleCreate(data interface{}, c *gin.Context) map[string][]string {
@@ -90,6 +97,31 @@ func RoleSave(data interface{}, c *gin.Context) map[string][]string {
 		},
 		"permission": []string{
 			"required:权限为必填项",
+		},
+	}
+	return validate(data, rules, messages)
+}
+
+func RoleFilter(data interface{}, c *gin.Context) map[string][]string {
+
+	rules := govalidator.MapData{
+		"name":     []string{"max_cn:20"},
+		"state":    []string{"in:1,2,3"},
+		"bet_time": []string{"slice_time"},
+		"title":    []string{"max_cn:20"},
+	}
+	messages := govalidator.MapData{
+		"name": []string{
+			"max_cn:权限地址长度不能超过 20 个字符",
+		},
+		"title": []string{
+			"max_cn:权限名称长度不能超过 20 个字符",
+		},
+		"state": []string{
+			"in:状态格式不正确",
+		},
+		"bet_time": []string{
+			"slice_time:时间格式不正确",
 		},
 	}
 	return validate(data, rules, messages)
