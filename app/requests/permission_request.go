@@ -6,15 +6,22 @@ import (
 )
 
 type PermissionRequest struct {
-	State       string `valid:"state" json:"state,omitempty"`
-	Type        string `valid:"type" json:"type,omitempty"`
-	Name        string `valid:"name" json:"name,omitempty"`
-	Title       string `valid:"title" json:"title,omitempty"`
-	Description string `valid:"description" json:"description,omitempty"`
-	Icon        string `valid:"icon" json:"icon,omitempty"`
-	Sort        string `valid:"sort" json:"sort,omitempty"`
-	Parent      string `valid:"parent" json:"parent,omitempty"`
-	Guard       string `valid:"guard" json:"guard,omitempty"`
+	State       string `valid:"state" json:"state,omitempty" select:"state"`
+	Type        string `valid:"type" json:"type,omitempty" select:"type"`
+	Name        string `valid:"name" json:"name,omitempty" select:"name"`
+	Title       string `valid:"title" json:"title,omitempty" select:"title"`
+	Description string `valid:"description" json:"description,omitempty" select:"description"`
+	Icon        string `valid:"icon" json:"icon,omitempty" select:"icon"`
+	Sort        string `valid:"sort" json:"sort,omitempty" select:"sort"`
+	Parent      string `valid:"parent" json:"parent,omitempty" select:"parent_id"`
+	Guard       string `valid:"guard" json:"guard,omitempty" select:"guard_name"`
+}
+type PermissionFilterRequest struct {
+	State   uint8  `valid:"state" json:"state,omitempty" form:"state" filter:"state,eq"`
+	Type    uint8  `valid:"type" json:"type,omitempty" form:"type" filter:"type,eq"`
+	Name    string `valid:"name" json:"name,omitempty" form:"name" filter:"name,like"`
+	Title   string `valid:"title" json:"title,omitempty" form:"title" filter:"title,like"`
+	BetTime string `valid:"bet_time" json:"bet_time,omitempty" form:"bet_time" filter:"created_at,bet_time"`
 }
 
 func PermissionCreate(data interface{}, c *gin.Context) map[string][]string {
@@ -125,6 +132,34 @@ func PermissionSave(data interface{}, c *gin.Context) map[string][]string {
 			"required:图标为必填项",
 			"min_cn:图标长度需大于 3 个字",
 			"max_cn:图标长度需小于 100 个字",
+		},
+	}
+	return validate(data, rules, messages)
+}
+func PermissionFilter(data interface{}, c *gin.Context) map[string][]string {
+
+	rules := govalidator.MapData{
+		"name":     []string{"max_cn:20"},
+		"state":    []string{"in:1,2,3"},
+		"type":     []string{"in:1,2"},
+		"bet_time": []string{"slice_time"},
+		"title":    []string{"max_cn:20"},
+	}
+	messages := govalidator.MapData{
+		"name": []string{
+			"max_cn:权限地址长度不能超过 20 个字符",
+		},
+		"title": []string{
+			"max_cn:权限名称长度不能超过 20 个字符",
+		},
+		"state": []string{
+			"in:状态格式不正确",
+		},
+		"type": []string{
+			"in:类型格式不正确",
+		},
+		"bet_time": []string{
+			"slice_time:时间格式不正确",
 		},
 	}
 	return validate(data, rules, messages)

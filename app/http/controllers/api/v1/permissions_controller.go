@@ -1,8 +1,12 @@
 package v1
 
 import (
+	"fmt"
+	"github.com/spf13/cast"
+	"item-server/app/http/resources"
 	"item-server/app/models/permission"
 	"item-server/app/requests"
+	"item-server/pkg/helpers"
 	"item-server/pkg/response"
 
 	"github.com/gin-gonic/gin"
@@ -13,25 +17,30 @@ type PermissionsController struct {
 }
 
 func (ctrl *PermissionsController) Index(c *gin.Context) {
+	requestFilter := requests.PermissionFilterRequest{}
+	if ok := requests.Validate(c, &requestFilter, requests.PermissionFilter); !ok {
+		return
+	}
 	request := requests.PaginationRequest{}
 	if ok := requests.Validate(c, &request, requests.Pagination); !ok {
 		return
 	}
 
-	data, pager := permission.Paginate(c, 10)
+	data, pager := permission.Paginate(c, 10, &requestFilter)
+
 	response.JSON(c, gin.H{
-		"data":  data,
+		"data":  resources.PermissionIndexResource(data),
 		"pager": pager,
 	})
 }
 
 func (ctrl *PermissionsController) Show(c *gin.Context) {
-	permissionModel := permission.Get(c.Param("id"))
+	permissionModel := permission.FirstById(cast.ToUint64(c.Param("id")))
 	if permissionModel.ID == 0 {
 		response.Abort404(c)
 		return
 	}
-	response.Data(c, permissionModel)
+	response.Data(c, resources.PermissionShowResource(permissionModel))
 }
 
 func (ctrl *PermissionsController) Store(c *gin.Context) {
@@ -62,12 +71,12 @@ func (ctrl *PermissionsController) Store(c *gin.Context) {
 
 func (ctrl *PermissionsController) Update(c *gin.Context) {
 
-	permissionModel := permission.Get(c.Param("id"))
+	permissionModel := permission.FirstById(cast.ToUint64(c.Param("id")))
 	if permissionModel.ID == 0 {
 		response.Abort404(c)
 		return
 	}
-
+	fmt.Println(c)
 	request := requests.PermissionRequest{}
 
 	if ok := requests.Validate(c, &request, requests.PermissionSave); !ok {
@@ -83,7 +92,8 @@ func (ctrl *PermissionsController) Update(c *gin.Context) {
 	permissionModel.ParentID = request.Parent
 	permissionModel.Icon = request.Icon
 	permissionModel.Sort = request.Sort
-	rowsAffected := permissionModel.Save()
+	permissionModel.UpdatedAt = helpers.TimeNow()
+	rowsAffected := permissionModel.Save(&request)
 	if rowsAffected > 0 {
 		response.Data(c, permissionModel)
 	} else {
@@ -93,7 +103,7 @@ func (ctrl *PermissionsController) Update(c *gin.Context) {
 
 func (ctrl *PermissionsController) Delete(c *gin.Context) {
 
-	permissionModel := permission.Get(c.Param("id"))
+	permissionModel := permission.FirstById(cast.ToUint64(c.Param("id")))
 	if permissionModel.ID == 0 {
 		response.Abort404(c)
 		return

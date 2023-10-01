@@ -4,6 +4,7 @@ package permission
 import (
 	"item-server/app/models"
 	"item-server/pkg/database"
+	"item-server/pkg/helpers"
 )
 
 type Permission struct {
@@ -26,8 +27,8 @@ func (permission *Permission) Create() {
 	database.DB.Create(&permission)
 }
 
-func (permission *Permission) Save() (rowsAffected int64) {
-	result := database.DB.Save(&permission)
+func (permission *Permission) Save(fieldSelect interface{}) (rowsAffected int64) {
+	result := database.DB.Select(helpers.ReqSelect(fieldSelect)).Save(&permission)
 	return result.RowsAffected
 }
 
