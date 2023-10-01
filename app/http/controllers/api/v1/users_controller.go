@@ -3,7 +3,7 @@ package v1
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cast"
-	v1 "item-server/app/http/resources/api/v1"
+	"item-server/app/http/resources"
 	"item-server/app/models/user"
 	"item-server/app/requests"
 	"item-server/pkg/hash"
@@ -27,7 +27,7 @@ func (ctrl *UsersController) Index(c *gin.Context) {
 
 	data, pager := user.Paginate(c, 10, &requestFilter)
 	response.JSON(c, gin.H{
-		"data":  v1.IndexResource(data),
+		"data":  resources.UserIndexResource(data),
 		"pager": pager,
 	})
 }
@@ -38,7 +38,7 @@ func (ctrl *UsersController) Show(c *gin.Context) {
 		response.Abort404(c)
 		return
 	}
-	response.Data(c, v1.ShowResource(userModel))
+	response.Data(c, resources.UserShowResource(userModel))
 }
 
 func (ctrl *UsersController) Store(c *gin.Context) {
@@ -88,7 +88,7 @@ func (ctrl *UsersController) Update(c *gin.Context) {
 	}
 	rowsAffected := userModel.SaveMany(&request, request.Role)
 	if rowsAffected > 0 {
-		response.Data(c, v1.ShowResource(user.FirstPreloadById(userModel.ID)))
+		response.Data(c, resources.UserShowResource(user.FirstPreloadById(userModel.ID)))
 	} else {
 		response.Abort500(c, "更新失败，请稍后尝试~")
 	}
@@ -110,18 +110,3 @@ func (ctrl *UsersController) Delete(c *gin.Context) {
 
 	response.Abort500(c, "删除失败，请稍后尝试~")
 }
-
-//func getFilterMaps(request requests.UserFilterRequest) map[string]interface{} {
-//	// eq 等于 lt小于 gt大于 neq不等于 egt大于等于 elt小于等于 bet 两个值之间 in 包含在给定的值列表中
-//	maps := make(map[string]interface{})
-//	if request.Name != "" {
-//		maps["like:name"] = request.Name
-//	}
-//	if request.State > 0 {
-//		maps["eq:state"] = request.State
-//	}
-//	if request.BetTime != "" {
-//		maps["bet:created_at"] = request.BetTime
-//	}
-//	return maps
-//}
