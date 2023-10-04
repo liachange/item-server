@@ -10,6 +10,7 @@ import (
 
 // SetupRoute 路由初始化
 func SetupRoute(router *gin.Engine) {
+
 	// 注册全局中间件
 	registerGlobalMiddleWare(router)
 
@@ -24,6 +25,7 @@ func registerGlobalMiddleWare(router *gin.Engine) {
 		middlewares.Logger(),
 		middlewares.Recovery(),
 		middlewares.ForceUA(),
+		middlewares.Cors(),
 	)
 }
 
