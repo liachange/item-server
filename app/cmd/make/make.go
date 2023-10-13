@@ -75,6 +75,7 @@ func init() {
 		CmdMakeRequest,
 		CmdMakePolicy,
 		CmdMakeResource,
+		CmdMakeOptimus,
 	)
 }
 

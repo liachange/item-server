@@ -189,3 +189,10 @@ func ReqFilter(req interface{}) map[string]interface{} {
 	fmt.Println(m)
 	return m
 }
+
+func IdVerify(v uint64) bool {
+	if len(cast.ToString(v)) >= 7 {
+		return true
+	}
+	return false
+}
