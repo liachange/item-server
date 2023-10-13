@@ -5,6 +5,7 @@ import (
 	v1 "item-server/app/http/controllers/api/v1"
 	"item-server/app/models/user"
 	"item-server/app/requests"
+	"item-server/pkg/hash"
 	"item-server/pkg/response"
 )
 
@@ -26,7 +27,7 @@ func (pc *PasswordController) ResetByPhone(c *gin.Context) {
 	if userModel.ID == 0 {
 		response.Abort404(c)
 	} else {
-		userModel.Password = request.Password
+		userModel.Password = hash.BcryptHash(request.Password)
 		userModel.Save()
 
 		response.Success(c)

@@ -62,6 +62,7 @@ func RegisterAPIRoutes(r *gin.Engine) {
 			pmc := new(controllers.PermissionsController)
 			pmcGroup := v1.Group("/permissions")
 			{
+				pmcGroup.GET("/initial", middlewares.AuthJWT(), pmc.InitialValue)
 				pmcGroup.GET("", middlewares.AuthJWT(), pmc.Index)
 				pmcGroup.POST("", middlewares.AuthJWT(), pmc.Store)
 				pmcGroup.PUT("/:id", middlewares.AuthJWT(), pmc.Update)

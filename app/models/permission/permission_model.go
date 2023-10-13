@@ -10,14 +10,14 @@ import (
 type Permission struct {
 	models.BaseModel
 
-	State       string `json:"state,omitempty"`
-	Type        string `json:"type,omitempty"`
+	State       uint8  `json:"state,omitempty"`
+	Type        uint8  `json:"type,omitempty"`
 	Name        string `json:"name,omitempty"`
 	Title       string `json:"title,omitempty"`
 	Description string `json:"description,omitempty"`
 	Icon        string `json:"icon,omitempty"`
-	Sort        string `gorm:"default:1" json:"sort,omitempty"`
-	ParentID    string `gorm:"default:0" json:"parent,omitempty"`
+	Sort        uint64 `gorm:"default:1" json:"sort,omitempty"`
+	ParentID    uint64 `gorm:"default:0" json:"parent,omitempty"`
 	GuardName   string `json:"guard,omitempty"`
 
 	models.CommonTimestampsField

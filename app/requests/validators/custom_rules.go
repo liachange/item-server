@@ -7,6 +7,7 @@ import (
 	"github.com/thedevsaddam/govalidator"
 	"item-server/pkg/database"
 	"item-server/pkg/helpers"
+	optimusPkg "item-server/pkg/optimus"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -31,7 +32,12 @@ func init() {
 		// 第三个参数，排除 ID
 		var exceptID uint64
 		if len(rng) > 2 {
-			exceptID = cast.ToUint64(rng[2])
+			id := cast.ToUint64(rng[2])
+			if id > 0 {
+				exceptID = optimusPkg.NewOptimus().Decode(id)
+			} else {
+				return errors.New(message)
+			}
 		}
 
 		// 用户请求过来的数据
@@ -101,9 +107,13 @@ func init() {
 		tableName := rng[0]
 		// 第二个参数，字段名称，如 id
 		dbFiled := rng[1]
-
 		// 用户请求过来的数据
-		requestValue := value.(string)
+		var requestValue any
+		if dbFiled == "id" {
+			requestValue = optimusPkg.NewOptimus().Decode(value.(uint64))
+		} else {
+			requestValue = value.(string)
+		}
 
 		// 查询数据库
 		var count int64
