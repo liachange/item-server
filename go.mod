@@ -15,6 +15,7 @@ require (
 	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d
 	github.com/mojocn/base64Captcha v1.3.5
+	github.com/pjebs/optimus-go v1.0.0
 	github.com/redis/go-redis/v9 v9.1.0
 	github.com/spf13/cast v1.5.1
 	github.com/spf13/cobra v1.7.0
@@ -67,7 +68,6 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
-	github.com/pjebs/optimus-go v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/spf13/afero v1.9.5 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
