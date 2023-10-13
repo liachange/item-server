@@ -6,14 +6,14 @@ import (
 )
 
 type PermissionRequest struct {
-	State       string `valid:"state" json:"state,omitempty" select:"state"`
-	Type        string `valid:"type" json:"type,omitempty" select:"type"`
+	State       uint8  `valid:"state" json:"state,omitempty" select:"state"`
+	Type        uint8  `valid:"type" json:"type,omitempty" select:"type"`
 	Name        string `valid:"name" json:"name,omitempty" select:"name"`
 	Title       string `valid:"title" json:"title,omitempty" select:"title"`
 	Description string `valid:"description" json:"description,omitempty" select:"description"`
 	Icon        string `valid:"icon" json:"icon,omitempty" select:"icon"`
-	Sort        string `valid:"sort" json:"sort,omitempty" select:"sort"`
-	Parent      string `valid:"parent" json:"parent,omitempty" select:"parent_id"`
+	Sort        uint64 `valid:"sort" json:"sort,omitempty" select:"sort"`
+	Parent      uint64 `valid:"parent" json:"parent,omitempty" select:"parent_id"`
 	Guard       string `valid:"guard" json:"guard,omitempty" select:"guard_name"`
 }
 type PermissionFilterRequest struct {
