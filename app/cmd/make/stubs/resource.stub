@@ -3,38 +3,46 @@ package resources
 import (
 	"item-server/app/models/{{VariableName}}"
 	"item-server/pkg/helpers"
+	optimusPkg "item-server/pkg/optimus"
 )
 
-func {{StructName}}IndexResource(models []{{VariableName}}.{{StructName}}) []interface{} {
-	s := make([]interface{}, 0)
-	for _, model := range models {
-		s = append(s, map[string]interface{}{
-			"id":          model.ID,
+type {{StructName}} struct {
+	Model      *{{VariableName}}.{{StructName}}
+	ModelSlice []{{VariableName}}.{{StructName}}
+}
+
+func (p *{{StructName}}) ShowResource() map[string]any {
+	optimus := optimusPkg.NewOptimus()
+	return map[string]any{
+		"id":          optimus.Encode(p.Model.ID),
+		"key":         optimus.Encode(p.Model.ID),
+		"state":       p.Model.State,
+		"created_at":  helpers.TimeFormat(p.Model.CreatedAt, "second"),
+		"updated_at":  helpers.TimeFormat(p.Model.UpdatedAt, "second"),
+	}
+}
+func (p *{{StructName}}) IndexResource() []any {
+	optimus := optimusPkg.NewOptimus()
+	s := make([]any, 0)
+	for _, model := range p.ModelSlice {
+		s = append(s, map[string]any{
+			"key":         optimus.Encode(model.ID),
+			"id":          optimus.Encode(model.ID),
 			"state":       model.State,
-			"{{VariableName}}s": {{VariableName}}Collection(model.{{StructName}}s),
 			"created_at":  helpers.TimeFormat(model.CreatedAt, "second"),
 			"updated_at":  helpers.TimeFormat(model.UpdatedAt, "second"),
 		})
 	}
 	return s
 }
-
-func {{StructName}}ShowResource(model {{VariableName}}.{{StructName}}) map[string]interface{} {
-	return map[string]interface{}{
-		"id":          model.ID,
-		"state":       model.State,
-		"{{VariableName}}s": {{VariableName}}Collection(model.{{StructName}}s),
-		"created_at":  helpers.TimeFormat(model.CreatedAt, "second"),
-		"updated_at":  helpers.TimeFormat(model.UpdatedAt, "second"),
-	}
-}
-func {{VariableName}}Collection(r []{{VariableName}}.{{StructName}}) []any {
-	s := make([]interface{}, 0)
-	for _, v := range r {
-		m := map[string]interface{}{
-			"id":    v.ID,
-		}
-		s = append(s, m)
+func (p *{{StructName}}) InitialResource() []any {
+	optimus := optimusPkg.NewOptimus()
+	s := make([]any, 0)
+	for _, model := range p.ModelSlice {
+		s = append(s, map[string]any{
+			"value": optimus.Encode(model.ID),
+			"label": model.Title,
+		})
 	}
 	return s
 }

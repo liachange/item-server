@@ -6,6 +6,8 @@ import (
     "item-server/pkg/response"
 	"item-server/app/http/resources"
     "github.com/gin-gonic/gin"
+    optimusPkg "item-server/pkg/optimus"
+    "github.com/spf13/cast"
 )
 
 type {{StructNamePlural}}Controller struct {
@@ -32,7 +34,11 @@ func (ctrl *{{StructNamePlural}}Controller) Index(c *gin.Context) {
 }
 
 func (ctrl *{{StructNamePlural}}Controller) Show(c *gin.Context) {
-    {{VariableName}}Model := {{PackageName}}.FindById(cast.ToUint64(c.Param("id")))
+    id := cast.ToUint64(c.Param("id"))
+	if ok := helpers.IdVerify(id); !ok {
+		return
+	}
+    {{VariableName}}Model := {{PackageName}}.FindById(optimusPkg.NewOptimus().Decode(id))
     if {{VariableName}}Model.ID == 0 {
         response.Abort404(c)
         return
@@ -60,7 +66,12 @@ func (ctrl *{{StructNamePlural}}Controller) Store(c *gin.Context) {
 
 func (ctrl *{{StructNamePlural}}Controller) Update(c *gin.Context) {
 
-    {{VariableName}}Model := {{PackageName}}.FindById(cast.ToUint64(c.Param("id")))
+    id := cast.ToUint64(c.Param("id"))
+	if ok := helpers.IdVerify(id); !ok {
+		return
+	}
+
+    {{VariableName}}Model := {{PackageName}}.FindById(optimusPkg.NewOptimus().Decode(id))
     if {{VariableName}}Model.ID == 0 {
         response.Abort404(c)
         return
@@ -82,7 +93,12 @@ func (ctrl *{{StructNamePlural}}Controller) Update(c *gin.Context) {
 
 func (ctrl *{{StructNamePlural}}Controller) Delete(c *gin.Context) {
 
-    {{VariableName}}Model := {{PackageName}}.FindById(cast.ToUint64(c.Param("id")))
+	id := cast.ToUint64(c.Param("id"))
+	if ok := helpers.IdVerify(id); !ok {
+		return
+	}
+
+    {{VariableName}}Model := {{PackageName}}.FindById(optimusPkg.NewOptimus().Decode(id))
     if {{VariableName}}Model.ID == 0 {
         response.Abort404(c)
         return
