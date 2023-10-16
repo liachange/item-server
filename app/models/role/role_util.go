@@ -2,6 +2,7 @@ package role
 
 import (
 	"gorm.io/gorm"
+	"item-server/app/models"
 	"item-server/pkg/app"
 	"item-server/pkg/database"
 	"item-server/pkg/filter"
@@ -20,8 +21,14 @@ func FindById(id uint64) (role Role) {
 // FindPreloadById 通过主键获取详细并加载关联
 func FindPreloadById(id uint64) (role Role) {
 	database.DB.Preload("Permissions", func(tx *gorm.DB) *gorm.DB {
-		return tx.Select("id,name,guard_name")
+		return tx.Select("id,name,title,guard_name")
 	}).First(&role, id)
+	return
+}
+
+// GetAll 全部角色
+func GetAll() (role []Role) {
+	database.DB.Select("id", "title", "name").Where("state=?", models.ConstShow()).Find(&role)
 	return
 }
 

@@ -3,10 +3,12 @@ package v1
 import (
 	"github.com/spf13/cast"
 	"item-server/app/http/resources"
+	"item-server/app/models"
 	"item-server/app/models/permission"
 	"item-server/app/models/role"
 	"item-server/app/requests"
 	"item-server/pkg/helpers"
+	optimusPkg "item-server/pkg/optimus"
 	"item-server/pkg/response"
 
 	"github.com/gin-gonic/gin"
@@ -14,6 +16,16 @@ import (
 
 type RolesController struct {
 	BaseAPIController
+}
+
+func (ctrl *RolesController) InitialValue(c *gin.Context) {
+	r := resources.Role{PerSlice: permission.GetAll()}
+	data := map[string]any{
+		"permissions": r.InitialPerSliceResource(),
+		"states":      models.InitState(),
+	}
+
+	response.Data(c, data)
 }
 
 func (ctrl *RolesController) Index(c *gin.Context) {
@@ -27,19 +39,26 @@ func (ctrl *RolesController) Index(c *gin.Context) {
 	}
 
 	data, pager := role.Paginate(c, 10, &requestFilter)
+	r := resources.Role{ModelSlice: data}
 	response.JSON(c, gin.H{
-		"data":  resources.RoleIndexResource(data),
+		"data":  r.IndexResource(),
 		"pager": pager,
 	})
 }
 
 func (ctrl *RolesController) Show(c *gin.Context) {
-	roleModel := role.FindPreloadById(cast.ToUint64(c.Param("id")))
+	id := cast.ToUint64(c.Param("id"))
+	if ok := helpers.IdVerify(id); !ok {
+		response.Abort404(c)
+		return
+	}
+	roleModel := role.FindPreloadById(optimusPkg.NewOptimus().Decode(id))
 	if roleModel.ID == 0 {
 		response.Abort404(c)
 		return
 	}
-	response.Data(c, resources.RoleShowResource(roleModel))
+	r := resources.Role{Model: &roleModel}
+	response.Data(c, r.ShowResource())
 }
 
 func (ctrl *RolesController) Store(c *gin.Context) {
@@ -48,7 +67,13 @@ func (ctrl *RolesController) Store(c *gin.Context) {
 	if ok := requests.Validate(c, &request, requests.RoleCreate); !ok {
 		return
 	}
-	perKey := permission.KeyPluck(request.Permission)
+	//权限标识参数处理
+	opt := optimusPkg.NewOptimus()
+	keys := make([]uint64, 0)
+	for _, v := range request.Permission {
+		keys = append(keys, opt.Decode(v))
+	}
+	perKey := permission.KeyPluck(keys)
 	roleModel := role.Role{
 		State:       request.State,
 		Name:        request.Name,
@@ -56,17 +81,23 @@ func (ctrl *RolesController) Store(c *gin.Context) {
 		GuardName:   request.Guard,
 		Description: request.Description,
 	}
-	rowsAffected := roleModel.CreateMany(perKey)
-	if rowsAffected > 0 {
-		response.Created(c, roleModel)
+	id := roleModel.CreateMany(perKey)
+	if id > 0 {
+		model := role.FindPreloadById(id)
+		r := resources.Role{Model: &model}
+		response.Created(c, r.ShowResource())
 	} else {
 		response.Abort500(c, "创建失败，请稍后尝试~")
 	}
 }
 
 func (ctrl *RolesController) Update(c *gin.Context) {
-
-	roleModel := role.FindById(cast.ToUint64(c.Param("id")))
+	id := cast.ToUint64(c.Param("id"))
+	if ok := helpers.IdVerify(id); !ok {
+		response.Abort404(c)
+		return
+	}
+	roleModel := role.FindById(optimusPkg.NewOptimus().Decode(id))
 	if roleModel.ID == 0 {
 		response.Abort404(c)
 		return
@@ -76,7 +107,13 @@ func (ctrl *RolesController) Update(c *gin.Context) {
 	if ok := requests.Validate(c, &request, requests.RoleSave); !ok {
 		return
 	}
-	perKey := permission.KeyPluck(request.Permission)
+	//权限标识参数处理
+	opt := optimusPkg.NewOptimus()
+	keys := make([]uint64, 0)
+	for _, v := range request.Permission {
+		keys = append(keys, opt.Decode(v))
+	}
+	perKey := permission.KeyPluck(keys)
 
 	roleModel.State = request.State
 	roleModel.Name = request.Name
@@ -86,15 +123,21 @@ func (ctrl *RolesController) Update(c *gin.Context) {
 	roleModel.UpdatedAt = helpers.TimeNow()
 	rowsAffected := roleModel.SaveMany(&request, perKey)
 	if rowsAffected > 0 {
-		response.Data(c, roleModel)
+		model := role.FindPreloadById(roleModel.ID)
+		r := resources.Role{Model: &model}
+		response.Data(c, r.ShowResource())
 	} else {
 		response.Abort500(c, "更新失败，请稍后尝试~")
 	}
 }
 
 func (ctrl *RolesController) Delete(c *gin.Context) {
-
-	roleModel := role.FindById(cast.ToUint64(c.Param("id")))
+	id := cast.ToUint64(c.Param("id"))
+	if ok := helpers.IdVerify(id); !ok {
+		response.Abort404(c)
+		return
+	}
+	roleModel := role.FindById(optimusPkg.NewOptimus().Decode(id))
 	if roleModel.ID == 0 {
 		response.Abort404(c)
 		return

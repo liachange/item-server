@@ -140,12 +140,21 @@ func init() {
 		if len(requestValue) == 0 {
 			return errors.New(message)
 		}
-
+		ids := make([]uint64, 0)
+		opt := optimusPkg.NewOptimus()
+		for _, v := range requestValue {
+			if v > 0 {
+				ids = append(ids, opt.Decode(v))
+			}
+		}
+		if len(ids) != len(requestValue) {
+			return errors.New(message)
+		}
 		// 查询数据库
 		var count int64
-		database.DB.Table(tableName).Where("id in ?", requestValue).Count(&count)
+		database.DB.Table(tableName).Where("id in ?", ids).Count(&count)
 		// 验证不通过，数据不存在
-		if cast.ToInt(count) != len(requestValue) {
+		if cast.ToInt(count) != len(ids) {
 			// 如果有自定义错误消息的话，使用自定义消息
 			return errors.New(message)
 		}
@@ -196,8 +205,9 @@ func init() {
 		requestValue := value.(string)
 		query := database.DB.Table(tableName)
 		if len(rng) == 2 {
-			if cast.ToUint64(rng[1]) > 0 {
-				query.Where("id <> ?", rng[1]).Where(
+			id := cast.ToUint64(rng[1])
+			if id > 0 {
+				query.Where("id <> ?", optimusPkg.NewOptimus().Decode(id)).Where(
 					database.DB.Or("phone = ?", requestValue).
 						Or("email = ?", requestValue).
 						Or("name = ?", requestValue),

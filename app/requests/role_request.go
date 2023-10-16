@@ -6,7 +6,7 @@ import (
 )
 
 type RoleRequest struct {
-	State       string   `valid:"state" json:"state,omitempty" select:"state"`
+	State       uint8    `valid:"state" json:"state,omitempty" select:"state"`
 	Name        string   `valid:"name" json:"name,omitempty" select:"name"`
 	Title       string   `valid:"title" json:"title,omitempty" select:"title"`
 	Description string   `valid:"description" json:"description,omitempty" select:"description"`

@@ -74,6 +74,7 @@ func RegisterAPIRoutes(r *gin.Engine) {
 			rc := new(controllers.RolesController)
 			rcGroup := v1.Group("/roles")
 			{
+				rcGroup.GET("/initial", middlewares.AuthJWT(), rc.InitialValue)
 				rcGroup.GET("", middlewares.AuthJWT(), rc.Index)
 				rcGroup.POST("", middlewares.AuthJWT(), rc.Store)
 				rcGroup.PUT("/:id", middlewares.AuthJWT(), rc.Update)
@@ -84,6 +85,8 @@ func RegisterAPIRoutes(r *gin.Engine) {
 			uc := new(controllers.UsersController)
 			ucGroup := v1.Group("/users")
 			{
+				ucGroup.GET("/menus", middlewares.AuthJWT(), uc.Menu)
+				ucGroup.GET("/initial", middlewares.AuthJWT(), uc.InitialValue)
 				ucGroup.GET("", middlewares.AuthJWT(), uc.Index)
 				ucGroup.POST("", middlewares.AuthJWT(), uc.Store)
 				ucGroup.PUT("/:id", middlewares.AuthJWT(), uc.Update)

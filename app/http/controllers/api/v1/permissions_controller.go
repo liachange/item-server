@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cast"
 	"item-server/app/http/resources"
+	"item-server/app/models"
 	"item-server/app/models/permission"
 	"item-server/app/requests"
 	"item-server/pkg/helpers"
@@ -21,7 +22,7 @@ func (ctrl *PermissionsController) InitialValue(c *gin.Context) {
 	data := map[string]any{
 		"categories": r.InitialResource(),
 		"genres":     permission.InitGenre(),
-		"states":     permission.InitState(),
+		"states":     models.InitState(),
 	}
 
 	response.Data(c, data)
@@ -50,6 +51,7 @@ func (ctrl *PermissionsController) Index(c *gin.Context) {
 func (ctrl *PermissionsController) Show(c *gin.Context) {
 	id := cast.ToUint64(c.Param("id"))
 	if ok := helpers.IdVerify(id); !ok {
+		response.Abort404(c)
 		return
 	}
 	permissionModel := permission.FindById(optimusPkg.NewOptimus().Decode(id))
@@ -68,7 +70,12 @@ func (ctrl *PermissionsController) Store(c *gin.Context) {
 	if ok := requests.Validate(c, &request, requests.PermissionCreate); !ok {
 		return
 	}
-
+	parent := request.Parent
+	if parent > 0 {
+		parent = optimusPkg.NewOptimus().Decode(request.Parent)
+	} else {
+		parent = 0
+	}
 	permissionModel := permission.Permission{
 		State:       request.State,
 		Type:        request.Type,
@@ -76,7 +83,7 @@ func (ctrl *PermissionsController) Store(c *gin.Context) {
 		Title:       request.Title,
 		GuardName:   request.Guard,
 		Description: request.Description,
-		ParentID:    optimusPkg.NewOptimus().Decode(request.Parent),
+		ParentID:    parent,
 		Icon:        request.Icon,
 		Sort:        request.Sort,
 	}
@@ -95,6 +102,7 @@ func (ctrl *PermissionsController) Update(c *gin.Context) {
 	id := cast.ToUint64(c.Param("id"))
 	fmt.Println(helpers.IdVerify(id))
 	if ok := helpers.IdVerify(id); !ok {
+		response.Abort404(c)
 		return
 	}
 	permissionModel := permission.FindById(optimusPkg.NewOptimus().Decode(id))
@@ -107,14 +115,19 @@ func (ctrl *PermissionsController) Update(c *gin.Context) {
 	if ok := requests.Validate(c, &request, requests.PermissionSave); !ok {
 		return
 	}
-
+	parent := request.Parent
+	if parent > 0 {
+		parent = optimusPkg.NewOptimus().Decode(request.Parent)
+	} else {
+		parent = 0
+	}
 	permissionModel.State = request.State
 	permissionModel.Type = request.Type
 	permissionModel.Name = request.Name
 	permissionModel.Title = request.Title
 	permissionModel.GuardName = request.Guard
 	permissionModel.Description = request.Description
-	permissionModel.ParentID = optimusPkg.NewOptimus().Decode(request.Parent)
+	permissionModel.ParentID = parent
 	permissionModel.Icon = request.Icon
 	permissionModel.Sort = request.Sort
 	permissionModel.UpdatedAt = helpers.TimeNow()
@@ -132,6 +145,7 @@ func (ctrl *PermissionsController) Update(c *gin.Context) {
 func (ctrl *PermissionsController) Delete(c *gin.Context) {
 	id := cast.ToUint64(c.Param("id"))
 	if ok := helpers.IdVerify(id); !ok {
+		response.Abort404(c)
 		return
 	}
 	permissionModel := permission.FindById(optimusPkg.NewOptimus().Decode(id))

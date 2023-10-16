@@ -13,6 +13,10 @@ type Permission struct {
 
 func (p *Permission) ShowResource() map[string]any {
 	optimus := optimusPkg.NewOptimus()
+	parent := p.Model.ParentID
+	if parent > 0 {
+		parent = optimus.Encode(p.Model.ParentID)
+	}
 	return map[string]any{
 		"id":          optimus.Encode(p.Model.ID),
 		"state":       p.Model.State,
@@ -20,7 +24,7 @@ func (p *Permission) ShowResource() map[string]any {
 		"title":       p.Model.Title,
 		"guard":       p.Model.GuardName,
 		"type":        p.Model.Type,
-		"parent":      optimus.Encode(p.Model.ParentID),
+		"parent":      parent,
 		"sort":        p.Model.Sort,
 		"icon":        p.Model.Icon,
 		"description": p.Model.Description,
@@ -32,6 +36,10 @@ func (p *Permission) IndexResource() []any {
 	optimus := optimusPkg.NewOptimus()
 	s := make([]any, 0)
 	for _, model := range p.ModelSlice {
+		parent := model.ParentID
+		if parent > 0 {
+			parent = optimus.Encode(model.ParentID)
+		}
 		s = append(s, map[string]any{
 			"id":          optimus.Encode(model.ID),
 			"state":       model.State,
@@ -39,7 +47,7 @@ func (p *Permission) IndexResource() []any {
 			"title":       model.Title,
 			"guard":       model.GuardName,
 			"type":        model.Type,
-			"parent":      optimus.Encode(p.Model.ParentID),
+			"parent":      parent,
 			"sort":        model.Sort,
 			"icon":        model.Icon,
 			"description": model.Description,

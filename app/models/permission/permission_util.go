@@ -1,6 +1,7 @@
 package permission
 
 import (
+	"item-server/app/models"
 	"item-server/pkg/app"
 	"item-server/pkg/database"
 	"item-server/pkg/filter"
@@ -13,10 +14,6 @@ import (
 const (
 	page = iota + 1
 	btn
-)
-const (
-	show = iota + 1
-	hide
 )
 
 // FindById 通过id获取详细
@@ -36,6 +33,12 @@ func PageCategory() (perm []Permission) {
 	return
 }
 
+// GetAll 全部权限
+func GetAll() (per []Permission) {
+	database.DB.Select("id", "title", "name", "type").Where("state=?", models.ConstShow()).Find(&per)
+	return
+}
+
 func InitGenre() []map[string]any {
 	return []map[string]any{
 		{
@@ -48,18 +51,7 @@ func InitGenre() []map[string]any {
 		},
 	}
 }
-func InitState() []map[string]any {
-	return []map[string]any{
-		{
-			"value": show,
-			"label": "显示",
-		},
-		{
-			"value": hide,
-			"label": "隐藏",
-		},
-	}
-}
+
 func Paginate(c *gin.Context, perPage int, filters interface{}) (permissions []Permission, paging paginator.Paging) {
 	query := database.DB.Model(Permission{})
 	// 拼接查询语句

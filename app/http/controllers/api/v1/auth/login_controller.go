@@ -2,10 +2,12 @@ package auth
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/spf13/cast"
 	v1 "item-server/app/http/controllers/api/v1"
 	"item-server/app/requests"
 	"item-server/pkg/auth"
 	"item-server/pkg/jwt"
+	optimusPkg "item-server/pkg/optimus"
 	"item-server/pkg/response"
 )
 
@@ -58,7 +60,7 @@ func (lc *LoginController) LoginByPassword(c *gin.Context) {
 	} else {
 		token := jwt.NewJWT().IssueToken(jwt.UserInfo{
 			Nickname: user.Nickname,
-			UserID:   user.GetStringID(),
+			UserID:   cast.ToString(optimusPkg.NewOptimus().Encode(user.ID)),
 		})
 		response.JSON(c, gin.H{
 			"token": token,

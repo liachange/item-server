@@ -45,7 +45,7 @@ func (userModel *User) Save() (rowsAffected int64) {
 }
 
 // CreateMany 创建用户并关联角色
-func (userModel *User) CreateMany(permKey []uint64) (rowsAffected int64) {
+func (userModel *User) CreateMany(permKey []uint64) (id uint64) {
 	err := database.DB.Transaction(func(tx *gorm.DB) error {
 		if err := (tx.Create(&userModel)).Error; err != nil {
 			return err
@@ -68,11 +68,10 @@ func (userModel *User) CreateMany(permKey []uint64) (rowsAffected int64) {
 		}
 		return nil
 	})
-	if err != nil {
-		return 0
-	} else {
-		return 1
+	if err == nil {
+		id = userModel.ID
 	}
+	return id
 }
 
 // SaveMany 修改用户信息和角色关联关系

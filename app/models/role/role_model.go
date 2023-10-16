@@ -13,7 +13,7 @@ import (
 
 type Role struct {
 	models.BaseModel
-	State       string                  `json:"state,omitempty"`
+	State       uint8                   `json:"state,omitempty"`
 	Name        string                  `json:"name,omitempty"`
 	GuardName   string                  `json:"guard,omitempty"`
 	Title       string                  `json:"title,omitempty"`
@@ -26,7 +26,7 @@ func (role *Role) Create() {
 	database.DB.Create(&role)
 }
 
-func (role *Role) CreateMany(permKey []uint64) (row int) {
+func (role *Role) CreateMany(permKey []uint64) (id uint64) {
 	err := database.DB.Transaction(func(tx *gorm.DB) error {
 		if err := (tx.Create(&role)).Error; err != nil {
 			return err
@@ -48,11 +48,10 @@ func (role *Role) CreateMany(permKey []uint64) (row int) {
 		}
 		return nil
 	})
-	if err != nil {
-		return 0
-	} else {
-		return 1
+	if err == nil {
+		id = role.ID
 	}
+	return id
 }
 
 func (role *Role) Save() (rowsAffected int64) {

@@ -4,15 +4,29 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cast"
 	"item-server/app/http/resources"
+	"item-server/app/models"
+	"item-server/app/models/role"
 	"item-server/app/models/user"
 	"item-server/app/requests"
+	"item-server/pkg/auth"
 	"item-server/pkg/hash"
 	"item-server/pkg/helpers"
+	optimusPkg "item-server/pkg/optimus"
 	"item-server/pkg/response"
 )
 
 type UsersController struct {
 	BaseAPIController
+}
+
+func (ctrl *UsersController) InitialValue(c *gin.Context) {
+	r := resources.User{RoleSlice: role.GetAll()}
+	data := map[string]any{
+		"roles":  r.InitialRoleResource(),
+		"states": models.InitState(),
+	}
+
+	response.Data(c, data)
 }
 
 func (ctrl *UsersController) Index(c *gin.Context) {
@@ -26,19 +40,26 @@ func (ctrl *UsersController) Index(c *gin.Context) {
 	}
 
 	data, pager := user.Paginate(c, 10, &requestFilter)
+	r := resources.User{ModelSlice: data}
 	response.JSON(c, gin.H{
-		"data":  resources.UserIndexResource(data),
+		"data":  r.IndexResource(),
 		"pager": pager,
 	})
 }
 
 func (ctrl *UsersController) Show(c *gin.Context) {
-	userModel := user.FindById(cast.ToUint64(c.Param("id")))
+	id := cast.ToUint64(c.Param("id"))
+	if ok := helpers.IdVerify(id); !ok {
+		response.Abort404(c)
+		return
+	}
+	userModel := user.FindPreloadById(optimusPkg.NewOptimus().Decode(id))
 	if userModel.ID == 0 {
 		response.Abort404(c)
 		return
 	}
-	response.Data(c, resources.UserShowResource(userModel))
+	r := resources.User{Model: &userModel}
+	response.Data(c, r.ShowResource())
 }
 
 func (ctrl *UsersController) Store(c *gin.Context) {
@@ -47,26 +68,37 @@ func (ctrl *UsersController) Store(c *gin.Context) {
 	if ok := requests.Validate(c, &request, requests.UserCreate); !ok {
 		return
 	}
-
+	//角色标识参数处理
+	opt := optimusPkg.NewOptimus()
+	ids := make([]uint64, 0)
+	for _, v := range request.Role {
+		ids = append(ids, opt.Decode(v))
+	}
 	userModel := user.User{
 		Name:     request.Name,
-		Password: request.Password,
+		Password: hash.BcryptHash(request.Password),
 		State:    request.State,
 		Nickname: request.Nickname,
 		Phone:    request.Phone,
 		Email:    request.Email,
 	}
-	userModel.CreateMany(request.Role)
-	if userModel.ID > 0 {
-		response.Created(c, userModel)
+	id := userModel.CreateMany(ids)
+	if id > 0 {
+		model := user.FindPreloadById(id)
+		r := resources.User{Model: &model}
+		response.Created(c, r.ShowResource())
 	} else {
 		response.Abort500(c, "创建失败，请稍后尝试~")
 	}
 }
 
 func (ctrl *UsersController) Update(c *gin.Context) {
-
-	userModel := user.FindById(cast.ToUint64(c.Param("id")))
+	id := cast.ToUint64(c.Param("id"))
+	if ok := helpers.IdVerify(id); !ok {
+		response.Abort404(c)
+		return
+	}
+	userModel := user.FindById(optimusPkg.NewOptimus().Decode(id))
 	if userModel.ID == 0 {
 		response.Abort404(c)
 		return
@@ -74,6 +106,12 @@ func (ctrl *UsersController) Update(c *gin.Context) {
 	request := requests.UserRequest{}
 	if ok := requests.Validate(c, &request, requests.UserSave); !ok {
 		return
+	}
+	//角色标识参数处理
+	opt := optimusPkg.NewOptimus()
+	ids := make([]uint64, 0)
+	for _, v := range request.Role {
+		ids = append(ids, opt.Decode(v))
 	}
 
 	userModel.State = request.State
@@ -86,17 +124,23 @@ func (ctrl *UsersController) Update(c *gin.Context) {
 	if len(cast.ToString(request.Password)) > 0 {
 		userModel.Password = hash.BcryptHash(request.Password)
 	}
-	rowsAffected := userModel.SaveMany(&request, request.Role)
+	rowsAffected := userModel.SaveMany(&request, ids)
 	if rowsAffected > 0 {
-		response.Data(c, resources.UserShowResource(user.FindPreloadById(userModel.ID)))
+		model := user.FindPreloadById(userModel.ID)
+		r := resources.User{Model: &model}
+		response.Data(c, r.ShowResource())
 	} else {
 		response.Abort500(c, "更新失败，请稍后尝试~")
 	}
 }
 
 func (ctrl *UsersController) Delete(c *gin.Context) {
-
-	userModel := user.FindById(cast.ToUint64(c.Param("id")))
+	id := cast.ToUint64(c.Param("id"))
+	if ok := helpers.IdVerify(id); !ok {
+		response.Abort404(c)
+		return
+	}
+	userModel := user.FindById(optimusPkg.NewOptimus().Decode(id))
 	if userModel.ID == 0 {
 		response.Abort404(c)
 		return
@@ -109,4 +153,24 @@ func (ctrl *UsersController) Delete(c *gin.Context) {
 	}
 
 	response.Abort500(c, "删除失败，请稍后尝试~")
+}
+
+func (ctrl *UsersController) Menu(c *gin.Context) {
+	id := cast.ToUint64(auth.CurrentUID(c))
+	if ok := helpers.IdVerify(id); !ok {
+		response.Abort404(c)
+		return
+	}
+	userModel := user.FindUserMenu(optimusPkg.NewOptimus().Decode(id))
+	if userModel.ID == 0 {
+		response.Abort404(c)
+		return
+	}
+	r := resources.User{Menu: &userModel}
+	data := map[string]any{
+		"menus": r.MenuResource(),
+	}
+
+	response.Data(c, data)
+	//response.Abort500(c, "账户信息获取失败，请稍后尝试~")
 }

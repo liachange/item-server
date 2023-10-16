@@ -2,6 +2,8 @@ package user
 
 import (
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+	"item-server/app/models"
 	"item-server/app/models/role"
 	"item-server/pkg/app"
 	"item-server/pkg/database"
@@ -43,7 +45,13 @@ func GetByMulti(loginID string) (userModel User) {
 
 // Get 通过 ID 获取用户
 func Get(idstr string) (userModel User) {
-	database.DB.Where("id", idstr).First(&userModel)
+	database.DB.Where("state=?", models.ConstShow()).Where("id", idstr).First(&userModel)
+	return
+}
+
+// GetById 外部使用
+func GetById(id uint64) (userModel User) {
+	database.DB.Where("state=?", models.ConstShow()).First(&userModel, id)
 	return
 }
 
@@ -63,6 +71,13 @@ func FindById(id uint64) (user User) {
 func FindPreloadById(id uint64) (user User) {
 	database.DB.Preload("Role").First(&user, id)
 	return
+}
+
+func FindUserMenu(id uint64) (user UserMany) {
+	database.DB.Preload("Roles.Permissions", func(db *gorm.DB) *gorm.DB {
+		return db.Order("permissions.sort desc")
+	}).Find(&user, id)
+	return user
 }
 
 func KeyPluck(key []uint64) (Keys []uint64) {
