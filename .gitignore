@@ -76,3 +76,7 @@ out/
 __debug_bin
 .project
 data/
+
+# 文件上传 #
+######################
+public/
