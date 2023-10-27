@@ -15,7 +15,6 @@ func (p *{{StructName}}) ShowResource() map[string]any {
 	optimus := optimusPkg.NewOptimus()
 	return map[string]any{
 		"id":          optimus.Encode(p.Model.ID),
-		"key":         optimus.Encode(p.Model.ID),
 		"state":       p.Model.State,
 		"created_at":  helpers.TimeFormat(p.Model.CreatedAt, "second"),
 		"updated_at":  helpers.TimeFormat(p.Model.UpdatedAt, "second"),
@@ -26,7 +25,6 @@ func (p *{{StructName}}) IndexResource() []any {
 	s := make([]any, 0)
 	for _, model := range p.ModelSlice {
 		s = append(s, map[string]any{
-			"key":         optimus.Encode(model.ID),
 			"id":          optimus.Encode(model.ID),
 			"state":       model.State,
 			"created_at":  helpers.TimeFormat(model.CreatedAt, "second"),
