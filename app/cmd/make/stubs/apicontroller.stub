@@ -26,9 +26,9 @@ func (ctrl *{{StructNamePlural}}Controller) Index(c *gin.Context) {
     }
 
     data, pager := {{VariableName}}.Paginate(c, 10, &requestFilter)
-
+    r := resources.{{StructName}}{ModelSlice: data}
     response.JSON(c, gin.H{
-        "data":  resources.{{StructName}}IndexResource(data),
+        "data":   r.IndexResource(),
         "pager": pager,
     })
 }
@@ -43,7 +43,8 @@ func (ctrl *{{StructNamePlural}}Controller) Show(c *gin.Context) {
         response.Abort404(c)
         return
     }
-    response.Data(c, resources.{{StructName}}ShowResource({{VariableName}}Model))
+    r := resources.{{StructName}}{Model: &{{VariableName}}Model}
+    response.Data(c, r.ShowResource())
 }
 
 func (ctrl *{{StructNamePlural}}Controller) Store(c *gin.Context) {
@@ -58,7 +59,9 @@ func (ctrl *{{StructNamePlural}}Controller) Store(c *gin.Context) {
     }
     {{VariableName}}Model.Create()
     if {{VariableName}}Model.ID > 0 {
-        response.Created(c, {{VariableName}}Model)
+        model :=  {{PackageName}}.FindById({{VariableName}}Model.ID)
+        r := resources.{{StructName}}{Model: &model}
+        response.Created(c, r.ShowResource())
     } else {
         response.Abort500(c, "创建失败，请稍后尝试~")
     }
@@ -85,7 +88,9 @@ func (ctrl *{{StructNamePlural}}Controller) Update(c *gin.Context) {
     {{VariableName}}Model.FieldName = request.FieldName
     rowsAffected := {{VariableName}}Model.Save(&request)
     if rowsAffected > 0 {
-        response.Data(c, {{VariableName}}Model)
+        model :=  {{PackageName}}.FindById({{VariableName}}Model.ID)
+        r := resources.{{StructName}}{Model: &model}
+        response.Data(c,r.ShowResource())
     } else {
         response.Abort500(c, "更新失败，请稍后尝试~")
     }
