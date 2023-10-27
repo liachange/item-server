@@ -7,6 +7,7 @@ import (
 	"io"
 	mathrand "math/rand"
 	"reflect"
+	"strings"
 	"time"
 	"unsafe"
 )
@@ -161,6 +162,22 @@ func ReqSelect(obj interface{}) []string {
 		tagValue := t.Field(i).Tag.Get("select")
 		if tagValue != "" {
 			value := v.Field(i).Interface()
+			if strings.Contains(tagValue, ",") {
+				tagValue = strings.TrimSuffix(tagValue, ",null")
+				v := reflect.ValueOf(value)
+				switch v.Kind() {
+				case reflect.String:
+					if v.Len() == 0 {
+						str = append(str, tagValue)
+					}
+					break
+				case reflect.Uint64, reflect.Uint8:
+					if v.Uint() == 0 {
+						str = append(str, tagValue)
+					}
+					break
+				}
+			}
 			if !Empty(value) {
 				str = append(str, tagValue)
 			}
