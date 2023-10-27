@@ -1,7 +1,6 @@
 package filter
 
 import (
-	"github.com/spf13/cast"
 	"gorm.io/gorm"
 	"item-server/pkg/helpers"
 	"strings"
@@ -17,7 +16,7 @@ func QueryFilter(query *gorm.DB, filters map[string]interface{}) *gorm.DB {
 			query.Where(rng[0]+" in ?", v)
 			break
 		case "like":
-			query.Where(rng[0]+" like ?", "%"+cast.ToString(v)+"%")
+			query.Where(rng[0]+" like ?", "%"+v.(string)+"%")
 			break
 		case "egt":
 			query.Where(rng[0]+" >= ?", v)
@@ -26,11 +25,8 @@ func QueryFilter(query *gorm.DB, filters map[string]interface{}) *gorm.DB {
 			query.Where(rng[0]+" <= ?", v)
 			break
 		case "bet_time":
-			str := cast.ToString(v)
-			if strings.Contains(str, ",") {
-				bet := strings.Split(str, ",")
-				query.Where(rng[0]+" between ? and ?", helpers.TimeStr(cast.ToInt64(bet[0]), "second"), helpers.TimeStr(cast.ToInt64(bet[1]), "second"))
-			}
+			bet := v.([]int64)
+			query.Where(rng[0]+" between ? and ?", helpers.TimeStr(bet[0], "second"), helpers.TimeStr(bet[1], "second"))
 			break
 		case "neq":
 			query.Where(rng[0]+" <> ?", v)
