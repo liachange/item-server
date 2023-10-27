@@ -92,6 +92,68 @@ func RegisterAPIRoutes(r *gin.Engine) {
 				ucGroup.PUT("/:id", middlewares.AuthJWT(), uc.Update)
 				ucGroup.DELETE("/:id", middlewares.AuthJWT(), uc.Delete)
 				ucGroup.GET("/:id", middlewares.AuthJWT(), uc.Show)
+				ucGroup.PUT("/avatar", middlewares.AuthJWT(), uc.UpdateAvatar)
+			}
+			// 分类
+			cac := new(controllers.CategoriesController)
+			cacGroup := v1.Group("/categories")
+			{
+				cacGroup.GET("/initial", middlewares.AuthJWT(), cac.InitialValue)
+				cacGroup.GET("", middlewares.AuthJWT(), cac.Index)
+				cacGroup.POST("", middlewares.AuthJWT(), cac.Store)
+				cacGroup.PUT("/:id", middlewares.AuthJWT(), cac.Update)
+				cacGroup.DELETE("/:id", middlewares.AuthJWT(), cac.Delete)
+				cacGroup.GET("/:id", middlewares.AuthJWT(), cac.Show)
+			}
+			// 文件上传
+			upc := new(controllers.UploadsController)
+			upcGroup := v1.Group("/image-upload")
+			{
+				upcGroup.POST("", middlewares.AuthJWT(), upc.Store)
+			}
+			//品牌
+			brc := new(controllers.BrandsController)
+			brcGroup := v1.Group("/brands")
+			{
+				brcGroup.GET("/initial", middlewares.AuthJWT(), brc.InitialValue)
+				brcGroup.GET("", middlewares.AuthJWT(), brc.Index)
+				brcGroup.POST("", middlewares.AuthJWT(), brc.Store)
+				brcGroup.PUT("/:id", middlewares.AuthJWT(), brc.Update)
+				brcGroup.DELETE("/:id", middlewares.AuthJWT(), brc.Delete)
+				brcGroup.GET("/:id", middlewares.AuthJWT(), brc.Show)
+			}
+			//属性名称
+			atc := new(controllers.AttributeNamesController)
+			atcGroup := v1.Group("attribute_names")
+			{
+				atcGroup.GET("/initial", middlewares.AuthJWT(), atc.InitialValue)
+				atcGroup.GET("", middlewares.AuthJWT(), atc.Index)
+				atcGroup.POST("", middlewares.AuthJWT(), atc.Store)
+				atcGroup.PUT("/:id", middlewares.AuthJWT(), atc.Update)
+				atcGroup.DELETE("/:id", middlewares.AuthJWT(), atc.Delete)
+				atcGroup.GET("/:id", middlewares.AuthJWT(), atc.Show)
+			}
+			//属性值
+			avc := new(controllers.AttributeValuesController)
+			avcGroup := v1.Group("attribute_values")
+			{
+				avcGroup.GET("/initial", middlewares.AuthJWT(), avc.InitialValue)
+				avcGroup.GET("", middlewares.AuthJWT(), avc.Index)
+				avcGroup.POST("", middlewares.AuthJWT(), avc.Store)
+				avcGroup.PUT("/:id", middlewares.AuthJWT(), avc.Update)
+				avcGroup.DELETE("/:id", middlewares.AuthJWT(), avc.Delete)
+				avcGroup.GET("/:id", middlewares.AuthJWT(), avc.Show)
+			}
+			//单位
+			unc := new(controllers.UnitsController)
+			uncGroup := v1.Group("/units")
+			{
+				uncGroup.GET("/initial", middlewares.AuthJWT(), unc.InitialValue)
+				uncGroup.GET("", middlewares.AuthJWT(), unc.Index)
+				uncGroup.POST("", middlewares.AuthJWT(), unc.Store)
+				uncGroup.PUT("/:id", middlewares.AuthJWT(), unc.Update)
+				uncGroup.DELETE("/:id", middlewares.AuthJWT(), unc.Delete)
+				uncGroup.GET("/:id", middlewares.AuthJWT(), unc.Show)
 			}
 		}
 	}
