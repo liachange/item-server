@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/spf13/cast"
+	"gorm.io/gorm"
 	"time"
 )
 
@@ -19,6 +20,11 @@ type BaseModel struct {
 type CommonTimestampsField struct {
 	CreatedAt time.Time `gorm:"column:created_at;index;" json:"created_at,omitempty"`
 	UpdatedAt time.Time `gorm:"column:updated_at;index;" json:"updated_at,omitempty"`
+}
+
+// DeletedAt 删除字段
+type DeletedAt struct {
+	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at;index;default:NULL;" json:"deleted_at,omitempty"`
 }
 
 // GetStringID 获取 ID 的字符串格式
