@@ -110,7 +110,13 @@ func init() {
 		// 用户请求过来的数据
 		var requestValue any
 		if dbFiled == "id" {
-			requestValue = optimusPkg.NewOptimus().Decode(value.(uint64))
+			v := value.(uint64)
+			if v == 0 {
+				return nil
+			} else {
+				requestValue = optimusPkg.NewOptimus().Decode(v)
+			}
+
 		} else {
 			requestValue = value.(string)
 		}
@@ -139,6 +145,10 @@ func init() {
 		requestValue := value.([]uint64)
 		if len(requestValue) == 0 {
 			return errors.New(message)
+		}
+
+		if len(requestValue) == 1 && requestValue[0] == 0 {
+			return nil
 		}
 		ids := make([]uint64, 0)
 		opt := optimusPkg.NewOptimus()
@@ -225,6 +235,76 @@ func init() {
 		query.Count(&count)
 		// 数据存在
 		if count != 0 {
+			return errors.New(message)
+		}
+		return nil
+	})
+
+	// 自定义规则 exists，确保数据库存在某条数据
+	// 一个使用场景是创建话题时需要附带 category_id 分类 ID 为参数，此时需要保证
+	// category_id 的值在数据库中存在，即可使用：
+	// exists:categories,id
+	govalidator.AddCustomRule("image_suffix", func(field string, rule string, message string, value interface{}) error {
+		var requestValue string
+		requestValue = cast.ToString(value)
+		suffix := []string{".png", ".jpg", ".jpeg"}
+		count := 0
+		if requestValue != "" {
+			for _, v := range suffix {
+				if strings.HasSuffix(requestValue, v) {
+					count = 1
+					break
+				}
+			}
+		}
+
+		// 验证不通过，数据不存在
+		if count == 0 {
+			// 如果有自定义错误消息的话，使用自定义消息
+			if message != "" {
+				return errors.New(message)
+			}
+			return fmt.Errorf("%v 不存在", requestValue)
+		}
+		return nil
+	})
+
+	// 自定义规则 exist_key，确保数据库存在某条数据
+	// id 的值在数据库中存在，即可使用：
+	// exist_key:categories
+	govalidator.AddCustomRule("exist_key_str", func(field string, rule string, message string, value interface{}) error {
+		// 第一个参数，表名称，如 categories
+		tableName := strings.TrimPrefix(rule, "exist_key_str:")
+
+		// 用户请求过来的数据
+		requestValue := value.(string)
+
+		if len(requestValue) == 0 {
+			return errors.New(message)
+		}
+		ids := make([]uint64, 0)
+		opt := optimusPkg.NewOptimus()
+		if strings.Contains(requestValue, ",") {
+			split := strings.Split(requestValue, ",")
+			for _, v := range split {
+				if id := cast.ToUint64(v); id > 0 {
+					ids = append(ids, opt.Decode(id))
+				}
+			}
+		} else {
+			if id := cast.ToUint64(requestValue); id > 0 {
+				ids = append(ids, opt.Decode(id))
+			} else {
+				return errors.New(message)
+			}
+		}
+
+		// 查询数据库
+		var count int64
+		database.DB.Table(tableName).Where("id in ?", ids).Count(&count)
+		// 验证不通过，数据不存在
+		if cast.ToInt(count) != len(ids) {
+			// 如果有自定义错误消息的话，使用自定义消息
 			return errors.New(message)
 		}
 		return nil

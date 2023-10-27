@@ -9,6 +9,8 @@ import (
 	"item-server/app/models/user"
 	"item-server/app/requests"
 	"item-server/pkg/auth"
+	"item-server/pkg/config"
+	"item-server/pkg/file"
 	"item-server/pkg/hash"
 	"item-server/pkg/helpers"
 	optimusPkg "item-server/pkg/optimus"
@@ -172,5 +174,39 @@ func (ctrl *UsersController) Menu(c *gin.Context) {
 	}
 
 	response.Data(c, data)
-	//response.Abort500(c, "账户信息获取失败，请稍后尝试~")
+}
+
+func (ctrl *UsersController) UpdateAvatar(c *gin.Context) {
+
+	request := requests.UserUpdateAvatarRequest{}
+	if ok := requests.Validate(c, &request, requests.UserUpdateAvatar); !ok {
+		return
+	}
+
+	id := cast.ToUint64(auth.CurrentUID(c))
+	if ok := helpers.IdVerify(id); !ok {
+		response.Abort404(c)
+		return
+	}
+	userModel := user.FindById(optimusPkg.NewOptimus().Decode(id))
+	if userModel.ID == 0 {
+		response.Abort404(c)
+		return
+	}
+
+	avatar, err := file.SaveUploadAvatar(c, request.Avatar)
+	if err != nil {
+		response.Abort500(c, "上传头像失败，请稍后尝试~")
+		return
+	}
+
+	userModel.Avatar = config.GetString("app.url") + avatar
+	rowsAffected := userModel.Save()
+	if rowsAffected > 0 {
+		model := user.FindById(userModel.ID)
+		r := resources.User{Model: &model}
+		response.Data(c, r.ShowResource())
+	} else {
+		response.Abort500(c, "更新失败，请稍后尝试~")
+	}
 }

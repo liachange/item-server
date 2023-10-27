@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/thedevsaddam/govalidator"
 	"item-server/app/requests/validators"
+	"mime/multipart"
 )
 
 type UserRequest struct {
@@ -21,6 +22,10 @@ type UserFilterRequest struct {
 	State   uint8  `valid:"state" json:"state,omitempty" form:"state" filter:"state,eq"`
 	Name    string `valid:"name" json:"name,omitempty" form:"name" filter:"name,like"`
 	BetTime string `valid:"bet_time" json:"bet_time,omitempty" form:"bet_time" filter:"created_at,bet_time"`
+}
+
+type UserUpdateAvatarRequest struct {
+	Avatar *multipart.FileHeader `valid:"avatar" form:"avatar"`
 }
 
 func UserCreate(data interface{}, c *gin.Context) map[string][]string {
@@ -158,4 +163,23 @@ func UserFilter(data interface{}, c *gin.Context) map[string][]string {
 		},
 	}
 	return validate(data, rules, messages)
+}
+func UserUpdateAvatar(data interface{}, c *gin.Context) map[string][]string {
+
+	rules := govalidator.MapData{
+		// size 的单位为 bytes
+		// - 1024 bytes 为 1kb
+		// - 1048576 bytes 为 1mb
+		// - 20971520 bytes 为 20mb
+		"file:avatar": []string{"ext:png,jpg,jpeg", "size:20971520", "required"},
+	}
+	messages := govalidator.MapData{
+		"file:avatar": []string{
+			"ext:ext头像只能上传 png, jpg, jpeg 任意一种的图片",
+			"size:头像文件最大不能超过 20MB",
+			"required:必须上传图片",
+		},
+	}
+
+	return validateFile(c, data, rules, messages)
 }
