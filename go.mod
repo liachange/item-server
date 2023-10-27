@@ -15,6 +15,7 @@ require (
 	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d
 	github.com/mojocn/base64Captcha v1.3.5
+	github.com/mozillazg/go-pinyin v0.20.0
 	github.com/pjebs/optimus-go v1.0.0
 	github.com/redis/go-redis/v9 v9.1.0
 	github.com/spf13/cast v1.5.1
