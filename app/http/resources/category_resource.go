@@ -11,57 +11,55 @@ type Category struct {
 	ModelSlice []category.Category
 	ModelTree  []*category.Category
 }
+type CategoryResource struct {
+	ID          uint64 `json:"id"`
+	State       uint8  `json:"state"`
+	Title       string `json:"title"`
+	ParentId    uint64 `json:"parent"`
+	Icon        string `json:"icon"`
+	Sort        uint64 `json:"sort"`
+	Description string `json:"desc"`
+	CreatedAt   string `json:"created_at"`
+	UpdatedAt   string `json:"updated_at"`
+}
 
-func (p *Category) ShowResource() map[string]any {
+func (p *Category) ShowResource() (show *CategoryResource) {
 	optimus := optimusPkg.NewOptimus()
 	parent := p.Model.ParentId
 	if parent > 0 {
 		parent = optimus.Encode(p.Model.ParentId)
 	}
-	return map[string]any{
-		"id":          optimus.Encode(p.Model.ID),
-		"state":       p.Model.State,
-		"title":       p.Model.Title,
-		"parent":      parent,
-		"description": p.Model.Description,
-		"icon":        p.Model.IconUrl,
-		"sort":        p.Model.Sort,
-		"created_at":  helpers.TimeFormat(p.Model.CreatedAt, "second"),
-		"updated_at":  helpers.TimeFormat(p.Model.UpdatedAt, "second"),
-	}
+	show.ID = optimus.Encode(p.Model.ID)
+	show.State = p.Model.State
+	show.Title = p.Model.Title
+	show.ParentId = parent
+	show.Description = p.Model.Description
+	show.Icon = p.Model.IconUrl
+	show.Sort = p.Model.Sort
+	show.CreatedAt = helpers.TimeFormat(p.Model.CreatedAt, "second")
+	show.UpdatedAt = helpers.TimeFormat(p.Model.UpdatedAt, "second")
+	return
 }
-func (p *Category) IndexResource() []any {
+func (p *Category) IndexResource() (index []*CategoryResource) {
 	optimus := optimusPkg.NewOptimus()
-	s := make([]any, 0)
 	for _, model := range p.ModelSlice {
 		parent := model.ParentId
 		if parent > 0 {
 			parent = optimus.Encode(model.ParentId)
 		}
-		s = append(s, map[string]any{
-			"id":          optimus.Encode(model.ID),
-			"state":       model.State,
-			"title":       model.Title,
-			"parent":      parent,
-			"description": model.Description,
-			"icon":        model.IconUrl,
-			"sort":        model.Sort,
-			"created_at":  helpers.TimeFormat(model.CreatedAt, "second"),
-			"updated_at":  helpers.TimeFormat(model.UpdatedAt, "second"),
+		index = append(index, &CategoryResource{
+			ID:          optimus.Encode(model.ID),
+			State:       model.State,
+			Title:       model.Title,
+			ParentId:    parent,
+			Description: model.Description,
+			Icon:        model.IconUrl,
+			Sort:        model.Sort,
+			CreatedAt:   helpers.TimeFormat(model.CreatedAt, "second"),
+			UpdatedAt:   helpers.TimeFormat(model.UpdatedAt, "second"),
 		})
 	}
-	return s
-}
-func (p *Category) InitialResource() []any {
-	optimus := optimusPkg.NewOptimus()
-	s := make([]any, 0)
-	for _, model := range p.ModelSlice {
-		s = append(s, map[string]any{
-			"value": optimus.Encode(model.ID),
-			"label": model.Title,
-		})
-	}
-	return s
+	return
 }
 
 type CategoryTree struct {
@@ -114,6 +112,22 @@ func (p *Category) TreeIterative(parentId uint64) []*CategoryTree {
 		}
 	}
 	return tree[parentId].Children
+}
+
+type CategoryHas struct {
+	ID    uint64 `json:"id"`
+	Title string `json:"title"`
+}
+
+func CategoryHasResource(r []*category.Many) (c []*CategoryHas) {
+	optimus := optimusPkg.NewOptimus()
+	for _, v := range r {
+		c = append(c, &CategoryHas{
+			ID:    optimus.Encode(v.ID),
+			Title: v.Title,
+		})
+	}
+	return
 }
 
 //func (p *Category) Convert(parentId uint64) []*CategoryTree {

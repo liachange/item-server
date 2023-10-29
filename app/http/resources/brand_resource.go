@@ -2,7 +2,6 @@ package resources
 
 import (
 	"item-server/app/models/brand"
-	"item-server/app/models/category"
 	"item-server/pkg/helpers"
 	optimusPkg "item-server/pkg/optimus"
 )
@@ -12,48 +11,62 @@ type Brand struct {
 	ModelSlice []brand.Brand
 }
 
-func (p *Brand) ShowResource() map[string]any {
-	optimus := optimusPkg.NewOptimus()
-
-	return map[string]any{
-		"id":          optimus.Encode(p.Model.ID),
-		"state":       p.Model.State,
-		"title":       p.Model.Title,
-		"description": p.Model.Description,
-		"icon":        p.Model.IconUrl,
-		"sort":        p.Model.Sort,
-		"categories":  category.OptId(p.Model.Category),
-		"created_at":  helpers.TimeFormat(p.Model.CreatedAt, "second"),
-		"updated_at":  helpers.TimeFormat(p.Model.UpdatedAt, "second"),
-	}
+type BrandResource struct {
+	ID          uint64         `json:"id"`
+	State       uint8          `json:"state"`
+	Title       string         `json:"title"`
+	Icon        string         `json:"icon"`
+	Sort        uint64         `json:"sort"`
+	Description string         `json:"desc"`
+	Categories  []*CategoryHas `json:"categories"`
+	CreatedAt   string         `json:"created_at"`
+	UpdatedAt   string         `json:"updated_at"`
 }
-func (p *Brand) IndexResource() []any {
-	optimus := optimusPkg.NewOptimus()
-	s := make([]any, 0)
-	for _, model := range p.ModelSlice {
 
-		s = append(s, map[string]any{
-			"id":          optimus.Encode(model.ID),
-			"state":       model.State,
-			"title":       model.Title,
-			"description": model.Description,
-			"icon":        model.IconUrl,
-			"sort":        model.Sort,
-			"categories":  category.OptId(model.Category),
-			"created_at":  helpers.TimeFormat(model.CreatedAt, "second"),
-			"updated_at":  helpers.TimeFormat(model.UpdatedAt, "second"),
+func (p *Brand) ShowResource() (show BrandResource) {
+	optimus := optimusPkg.NewOptimus()
+	show.ID = optimus.Encode(p.Model.ID)
+	show.Title = p.Model.Title
+	show.Sort = p.Model.Sort
+	show.Icon = p.Model.IconUrl
+	show.State = p.Model.State
+	show.Description = p.Model.Description
+	show.Categories = CategoryHasResource(p.Model.Category)
+	show.UpdatedAt = helpers.TimeFormat(p.Model.UpdatedAt, "second")
+	show.CreatedAt = helpers.TimeFormat(p.Model.CreatedAt, "second")
+	return
+}
+
+func (p *Brand) IndexResource() (index []*BrandResource) {
+	optimus := optimusPkg.NewOptimus()
+	for _, model := range p.ModelSlice {
+		index = append(index, &BrandResource{
+			ID:          optimus.Encode(model.ID),
+			State:       model.State,
+			Title:       model.Title,
+			Description: model.Description,
+			Icon:        model.IconUrl,
+			Sort:        model.Sort,
+			Categories:  CategoryHasResource(model.Category),
+			CreatedAt:   helpers.TimeFormat(model.CreatedAt, "second"),
+			UpdatedAt:   helpers.TimeFormat(model.UpdatedAt, "second"),
 		})
 	}
-	return s
+	return
 }
-func (p *Brand) InitialResource() []any {
+
+type BrandSelect struct {
+	ID    uint64 `json:"value"`
+	Title string `json:"title"`
+}
+
+func (p *Brand) InitialResource() (sel []*BrandSelect) {
 	optimus := optimusPkg.NewOptimus()
-	s := make([]any, 0)
 	for _, model := range p.ModelSlice {
-		s = append(s, map[string]any{
-			"value": optimus.Encode(model.ID),
-			"label": model.Title,
+		sel = append(sel, &BrandSelect{
+			ID:    optimus.Encode(model.ID),
+			Title: model.Title,
 		})
 	}
-	return s
+	return
 }

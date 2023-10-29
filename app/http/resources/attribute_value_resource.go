@@ -11,38 +11,65 @@ type AttributeValue struct {
 	ModelSlice []*attribute_value.AttributeValue
 }
 
-func (p *AttributeValue) ShowResource() map[string]any {
-	optimus := optimusPkg.NewOptimus()
-	return map[string]any{
-		"id":             optimus.Encode(p.Model.ID),
-		"state":          p.Model.State,
-		"title":          p.Model.Title,
-		"description":    p.Model.Description,
-		"attribute_name": optimus.Encode(p.Model.AttributeNameId),
-		"sort":           p.Model.Sort,
-		"abbr":           p.Model.Abbr,
-		"search":         p.Model.Search,
-		"created_at":     helpers.TimeFormat(p.Model.CreatedAt, "second"),
-		"updated_at":     helpers.TimeFormat(p.Model.UpdatedAt, "second"),
-	}
+type AttributeValueResource struct {
+	ID              uint64 `json:"id"`
+	AttributeNameId uint64 `json:"attribute_name"`
+	State           uint8  `json:"state"`
+	Title           string `json:"title"`
+	Description     string `json:"desc"`
+	Sort            uint64 `json:"sort"`
+	Abbr            string `json:"abbr"`
+	Search          string `json:"search"`
+	CreatedAt       string `json:"created_at"`
+	UpdatedAt       string `json:"updated_at"`
 }
-func (p *AttributeValue) IndexResource() []any {
+
+func (p *AttributeValue) ShowResource() (show *AttributeValueResource) {
 	optimus := optimusPkg.NewOptimus()
-	s := make([]any, 0)
+	show.ID = optimus.Encode(p.Model.ID)
+	show.State = p.Model.State
+	show.Title = p.Model.Title
+	show.Description = p.Model.Description
+	show.AttributeNameId = optimus.Encode(p.Model.AttributeNameId)
+	show.Sort = p.Model.Sort
+	show.Abbr = p.Model.Abbr
+	show.Search = p.Model.Search
+	show.CreatedAt = helpers.TimeFormat(p.Model.CreatedAt, "second")
+	show.UpdatedAt = helpers.TimeFormat(p.Model.UpdatedAt, "second")
+	return
+
+}
+
+type AttributeValueIndexResource struct {
+	ID                uint64 `json:"id"`
+	AttributeNameId   uint64 `json:"attribute_name"`
+	AttributeNameAbbr string `json:"attribute_abbr"`
+	State             uint8  `json:"state"`
+	Title             string `json:"title"`
+	Description       string `json:"desc"`
+	Sort              uint64 `json:"sort"`
+	Abbr              string `json:"abbr"`
+	Search            string `json:"search"`
+	CreatedAt         string `json:"created_at"`
+	UpdatedAt         string `json:"updated_at"`
+}
+
+func (p *AttributeValue) IndexResource() (index []*AttributeValueIndexResource) {
+	optimus := optimusPkg.NewOptimus()
 	for _, model := range p.ModelSlice {
-		s = append(s, map[string]any{
-			"id":             optimus.Encode(model.ID),
-			"state":          model.State,
-			"title":          model.Title,
-			"description":    model.Description,
-			"attribute_name": optimus.Encode(model.AttributeNameId),
-			"sort":           model.Sort,
-			"abbr":           model.Abbr,
-			"search":         model.Search,
-			"attribute_abbr": model.AttributeName.Title,
-			"created_at":     helpers.TimeFormat(model.CreatedAt, "second"),
-			"updated_at":     helpers.TimeFormat(model.UpdatedAt, "second"),
+		index = append(index, &AttributeValueIndexResource{
+			ID:                optimus.Encode(model.ID),
+			State:             model.State,
+			Title:             model.Title,
+			Description:       model.Description,
+			AttributeNameId:   optimus.Encode(model.AttributeNameId),
+			Sort:              model.Sort,
+			Abbr:              model.Abbr,
+			Search:            model.Search,
+			AttributeNameAbbr: model.AttributeName.Abbr,
+			CreatedAt:         helpers.TimeFormat(model.CreatedAt, "second"),
+			UpdatedAt:         helpers.TimeFormat(model.UpdatedAt, "second"),
 		})
 	}
-	return s
+	return
 }
