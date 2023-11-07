@@ -17,7 +17,8 @@ type BrandResource struct {
 	Title       string         `json:"title"`
 	Icon        string         `json:"icon"`
 	Sort        uint64         `json:"sort"`
-	Description string         `json:"desc"`
+	Description string         `json:"description"`
+	Public      uint8          `json:"public"`
 	Categories  []*CategoryHas `json:"categories"`
 	CreatedAt   string         `json:"created_at"`
 	UpdatedAt   string         `json:"updated_at"`
@@ -47,6 +48,7 @@ func (p *Brand) IndexResource() (index []*BrandResource) {
 			Description: model.Description,
 			Icon:        model.IconUrl,
 			Sort:        model.Sort,
+			Public:      model.IsPublic,
 			Categories:  CategoryHasResource(model.Category),
 			CreatedAt:   helpers.TimeFormat(model.CreatedAt, "second"),
 			UpdatedAt:   helpers.TimeFormat(model.UpdatedAt, "second"),

@@ -22,7 +22,7 @@ func (ctrl *BrandsController) InitialValue(c *gin.Context) {
 	r := resources.Category{ModelTree: category.TreeCategoryAll()}
 	data := map[string]any{
 		"states":     models.InitState(),
-		"categories": r.TreeIterative(0),
+		"categories": r.CategorySelectResource(),
 	}
 
 	response.Data(c, data)
@@ -130,6 +130,7 @@ func (ctrl *BrandsController) Update(c *gin.Context) {
 	brandModel.Description = request.Description
 	brandModel.IconUrl = request.IconUrl
 	brandModel.IsPublic = rep.IsPublic
+	brandModel.Sort = request.Sort
 	brandModel.UpdatedAt = rep.UpdatedAt
 	rowsAffected := brandModel.SaveMany(rep.SelectSlice, rep.Ids)
 	if rowsAffected > 0 {
