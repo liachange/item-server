@@ -6,6 +6,7 @@ import (
 	"item-server/app/http/controllers/api/v1/auth"
 	"item-server/app/http/middlewares"
 	"item-server/pkg/config"
+	"net/http"
 )
 
 // RegisterAPIRoutes 注册网页相关路由
@@ -110,6 +111,12 @@ func RegisterAPIRoutes(r *gin.Engine) {
 			upcGroup := v1.Group("/image-upload")
 			{
 				upcGroup.POST("", middlewares.AuthJWT(), upc.Store)
+
+			}
+			//预览
+			upcGroupFs := v1.Group("/uploads")
+			{
+				upcGroupFs.StaticFS("", http.Dir(upc.ImagePath()))
 			}
 			//品牌
 			brc := new(controllers.BrandsController)
