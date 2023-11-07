@@ -44,3 +44,6 @@ func (ctrl *UploadsController) Store(c *gin.Context) {
 	}
 	response.Data(c, imgUrl)
 }
+func (ctrl *UploadsController) ImagePath() string {
+	return "public/uploads/images"
+}
