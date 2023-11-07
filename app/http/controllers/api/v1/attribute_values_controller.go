@@ -59,7 +59,7 @@ func (ctrl *AttributeValuesController) Show(c *gin.Context) {
 	if ok := helpers.IdVerify(id); !ok {
 		return
 	}
-	attributeValueModel := attributeValue.FindById(optimusPkg.NewOptimus().Decode(id))
+	attributeValueModel := attributeValue.FindPreloadById(optimusPkg.NewOptimus().Decode(id))
 	if attributeValueModel.ID == 0 {
 		response.Abort404(c)
 		return
@@ -86,7 +86,7 @@ func (ctrl *AttributeValuesController) Store(c *gin.Context) {
 	}
 	attributeValueModel.Create()
 	if attributeValueModel.ID > 0 {
-		model := attributeValue.FindById(attributeValueModel.ID)
+		model := attributeValue.FindPreloadById(attributeValueModel.ID)
 		r := resources.AttributeValue{Model: &model}
 		response.Created(c, r.ShowResource())
 	} else {
@@ -118,10 +118,11 @@ func (ctrl *AttributeValuesController) Update(c *gin.Context) {
 	attributeValueModel.AttributeNameId = optimusPkg.NewOptimus().Decode(request.AttributeNameId)
 	attributeValueModel.Search = request.Search
 	attributeValueModel.Abbr = pinyin.GetFirstSpell(request.Title)
+	attributeValueModel.Sort = request.Sort
 	attributeValueModel.UpdatedAt = helpers.TimeNow()
 	rowsAffected := attributeValueModel.Save(&request)
 	if rowsAffected > 0 {
-		model := attributeValue.FindById(attributeValueModel.ID)
+		model := attributeValue.FindPreloadById(attributeValueModel.ID)
 		r := resources.AttributeValue{Model: &model}
 		response.Data(c, r.ShowResource())
 	} else {

@@ -18,7 +18,7 @@ func FindById(id uint64) (attributeValue AttributeValue) {
 
 // FindPreloadById 通过主键获取详细并加载关联
 func FindPreloadById(id uint64) (attributeValue AttributeValue) {
-	database.DB.First(&attributeValue, id)
+	database.DB.Preload("AttributeName").First(&attributeValue, id)
 	return
 }
 
