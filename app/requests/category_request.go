@@ -15,6 +15,7 @@ type CategoryRequest struct {
 }
 
 type CategoryFilterRequest struct {
+	Parent   uint64 `valid:"parent" json:"parent,omitempty" form:"parent"`
 	State    uint8  `valid:"state" json:"state,omitempty" form:"state"`
 	Title    string `valid:"title" json:"title,omitempty" form:"title"`
 	BetTime  string `valid:"bet_time" json:"bet_time,omitempty" form:"bet_time"`

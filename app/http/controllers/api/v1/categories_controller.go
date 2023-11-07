@@ -21,7 +21,7 @@ func (ctrl *CategoriesController) InitialValue(c *gin.Context) {
 	r := resources.Category{ModelTree: category.TreeCategoryAll()}
 	data := map[string]any{
 		"states":     models.InitState(),
-		"categories": r.TreeIterative(0),
+		"categories": r.CategorySelectResource(),
 	}
 
 	response.Data(c, data)
@@ -33,6 +33,7 @@ func (ctrl *CategoriesController) Index(c *gin.Context) {
 	if ok := requests.Validate(c, &requestFilter, requests.CategoryFilter); !ok {
 		return
 	}
+
 	request := requests.PaginationRequest{}
 	if ok := requests.Validate(c, &request, requests.Pagination); !ok {
 		return
@@ -73,17 +74,20 @@ func (ctrl *CategoriesController) Store(c *gin.Context) {
 		return
 	}
 
-	var parent uint64
-	if request.ParentId > 0 {
-		parent = optimusPkg.NewOptimus().Decode(request.ParentId)
+	//请求参数处理
+	rep := replaces.CategoryStore{}
+	if err := rep.CategoryStoreReplace(&request); err != nil {
+		return
 	}
+
 	categoryModel := category.Category{
 		State:       request.State,
 		Title:       request.Title,
 		Description: request.Description,
-		ParentId:    parent,
+		ParentId:    rep.ParentId,
 		Sort:        request.Sort,
 		IconUrl:     request.IconUrl,
+		Abbr:        rep.Abbr,
 	}
 	id := categoryModel.Create()
 	if id > 0 {
@@ -112,19 +116,21 @@ func (ctrl *CategoriesController) Update(c *gin.Context) {
 	if ok := requests.Validate(c, &request, requests.CategorySave); !ok {
 		return
 	}
-	parent := request.ParentId
-	if parent > 0 {
-		parent = optimusPkg.NewOptimus().Decode(request.ParentId)
-	} else {
-		parent = 0
+
+	//请求参数处理
+	rep := replaces.CategorySave{}
+	if err := rep.CategorySaveReplace(&request); err != nil {
+		return
 	}
+
 	categoryModel.State = request.State
 	categoryModel.Title = request.Title
 	categoryModel.Description = request.Description
 	categoryModel.IconUrl = request.IconUrl
-	categoryModel.ParentId = parent
+	categoryModel.ParentId = rep.ParentId
+	categoryModel.Abbr = rep.Abbr
 	categoryModel.UpdatedAt = helpers.TimeNow()
-	rowsAffected := categoryModel.Save(&request)
+	rowsAffected := categoryModel.Save(rep.SelectSlice)
 	if rowsAffected > 0 {
 		model := category.FindById(categoryModel.ID)
 		r := resources.Category{Model: &model}

@@ -18,12 +18,13 @@ type CategoryResource struct {
 	ParentId    uint64 `json:"parent"`
 	Icon        string `json:"icon"`
 	Sort        uint64 `json:"sort"`
+	Abbr        string `json:"abbr"`
 	Description string `json:"desc"`
 	CreatedAt   string `json:"created_at"`
 	UpdatedAt   string `json:"updated_at"`
 }
 
-func (p *Category) ShowResource() (show *CategoryResource) {
+func (p *Category) ShowResource() (show CategoryResource) {
 	optimus := optimusPkg.NewOptimus()
 	parent := p.Model.ParentId
 	if parent > 0 {
@@ -36,6 +37,7 @@ func (p *Category) ShowResource() (show *CategoryResource) {
 	show.Description = p.Model.Description
 	show.Icon = p.Model.IconUrl
 	show.Sort = p.Model.Sort
+	show.Abbr = p.Model.Abbr
 	show.CreatedAt = helpers.TimeFormat(p.Model.CreatedAt, "second")
 	show.UpdatedAt = helpers.TimeFormat(p.Model.UpdatedAt, "second")
 	return
@@ -55,6 +57,7 @@ func (p *Category) IndexResource() (index []*CategoryResource) {
 			Description: model.Description,
 			Icon:        model.IconUrl,
 			Sort:        model.Sort,
+			Abbr:        model.Abbr,
 			CreatedAt:   helpers.TimeFormat(model.CreatedAt, "second"),
 			UpdatedAt:   helpers.TimeFormat(model.UpdatedAt, "second"),
 		})
@@ -73,6 +76,9 @@ type CategoryTree struct {
 func (p *Category) TreeIterative(parentId uint64) []*CategoryTree {
 	optimus := optimusPkg.NewOptimus()
 	tree := make(map[uint64]*CategoryTree, 0)
+	if len(p.ModelTree) == 0 {
+		return make([]*CategoryTree, 0)
+	}
 	for _, v := range p.ModelTree {
 		id := v.ID
 		if id > 0 {
@@ -125,6 +131,26 @@ func CategoryHasResource(r []*category.Many) (c []*CategoryHas) {
 		c = append(c, &CategoryHas{
 			ID:    optimus.Encode(v.ID),
 			Title: v.Title,
+		})
+	}
+	return
+}
+
+type CategorySelect struct {
+	ID    uint64 `json:"id"`
+	Title string `json:"title"`
+	Level uint8  `json:"level"`
+	Abbr  string `json:"abbr"`
+}
+
+func (p *Category) CategorySelectResource() (sel []*CategorySelect) {
+	optimus := optimusPkg.NewOptimus()
+	for _, model := range p.ModelTree {
+		sel = append(sel, &CategorySelect{
+			ID:    optimus.Encode(model.ID),
+			Title: model.Title,
+			Abbr:  model.Abbr,
+			Level: model.Level,
 		})
 	}
 	return

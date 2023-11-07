@@ -21,7 +21,11 @@ func KeyPluck(key []uint64) (Keys []uint64) {
 }
 
 func TreeCategoryAll() (category []*Category) {
-	database.DB.Select("id", "title", "sort", "parent_id").Order("level_tree asc").Find(&category)
+	database.DB.Select("id", "title", "abbr", "sort", "parent_id", "level").Order("sort asc").Find(&category)
+	return
+}
+func LevelTree(parent uint64) (category Category) {
+	database.DB.Select("id", "level", "level_tree").First(&category, parent)
 	return
 }
 

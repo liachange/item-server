@@ -19,6 +19,7 @@ type Category struct {
 	ParentId    uint64 `json:"parent,omitempty"`
 	Level       uint8  `json:"level,omitempty"`
 	LevelTree   string `json:"level_tree,omitempty"`
+	Abbr        string `json:"abbr,omitempty"`
 
 	models.DeletedAt
 	models.CommonTimestampsField
@@ -46,7 +47,7 @@ func (category *Category) Create() (id uint64) {
 	return id
 }
 
-func (category *Category) Save(fieldSelect any) (rowsAffected int64) {
+func (category *Category) Save(sel []string) (rowsAffected int64) {
 	var level uint8 = 1
 	tree := "." + cast.ToString(category.ID) + "."
 	if category.ParentId > 0 {
@@ -57,10 +58,7 @@ func (category *Category) Save(fieldSelect any) (rowsAffected int64) {
 	}
 	category.Level = level
 	category.LevelTree = tree
-	//追加更新字段
-	selectStr := helpers.ReqSelect(fieldSelect)
-	selectStr = append(selectStr, "level", "level_tree")
-	result := database.DB.Select(selectStr).Save(&category)
+	result := database.DB.Select(sel).Save(&category)
 	return result.RowsAffected
 }
 
