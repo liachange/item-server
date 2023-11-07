@@ -33,7 +33,7 @@ func AttributeNameCreate(data interface{}, c *gin.Context) map[string][]string {
 		"description": []string{"max_cn:255"},
 		"search":      []string{"max_cn:50"},
 		"sort":        []string{"numeric_between:1,9999"},
-		"category":    []string{"required"},
+		"category":    []string{"required", "exist_key:categories"},
 	}
 	messages := govalidator.MapData{
 		"state": []string{
@@ -61,6 +61,7 @@ func AttributeNameCreate(data interface{}, c *gin.Context) map[string][]string {
 		},
 		"category": []string{
 			"required:分类为必填项",
+			"exist_key:格式不正确",
 		},
 	}
 	return validate(data, rules, messages)
@@ -74,7 +75,7 @@ func AttributeNameSave(data interface{}, c *gin.Context) map[string][]string {
 		"description": []string{"max_cn:255"},
 		"search":      []string{"max_cn:50"},
 		"sort":        []string{"numeric_between:1,9999"},
-		"category":    []string{"required"},
+		"category":    []string{"required", "exist_key:categories"},
 	}
 	messages := govalidator.MapData{
 		"state": []string{

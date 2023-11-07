@@ -19,13 +19,13 @@ type AttributeNameResource struct {
 	Genre       uint8          `json:"genre"`
 	Sort        uint64         `json:"sort"`
 	Search      string         `json:"search"`
-	Description string         `json:"desc"`
+	Description string         `json:"description"`
 	Categories  []*CategoryHas `json:"categories"`
 	CreatedAt   string         `json:"created_at"`
 	UpdatedAt   string         `json:"updated_at"`
 }
 
-func (p *AttributeName) ShowResource() (show *AttributeNameResource) {
+func (p *AttributeName) ShowResource() (show AttributeNameResource) {
 	optimus := optimusPkg.NewOptimus()
 	show.ID = optimus.Encode(p.Model.ID)
 	show.State = p.Model.State
@@ -63,8 +63,9 @@ func (p *AttributeName) IndexResource() (index []*AttributeNameResource) {
 }
 
 type AttributeNameSelect struct {
-	ID    uint64 `json:"value"`
+	ID    uint64 `json:"id"`
 	Title string `json:"title"`
+	Abbr  string `json:"abbr"`
 }
 
 func (p *AttributeName) InitialResource() (sel []*AttributeNameSelect) {
@@ -74,6 +75,7 @@ func (p *AttributeName) InitialResource() (sel []*AttributeNameSelect) {
 		sel = append(sel, &AttributeNameSelect{
 			ID:    optimus.Encode(model.ID),
 			Title: model.Title,
+			Abbr:  model.Abbr,
 		})
 	}
 	return

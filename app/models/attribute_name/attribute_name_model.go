@@ -9,6 +9,12 @@ import (
 	"item-server/pkg/helpers"
 )
 
+const (
+	sku = iota + 1
+	item
+	other
+)
+
 type AttributeName struct {
 	models.BaseModel
 
@@ -60,7 +66,7 @@ func (attributeName *AttributeName) CreateMany(permKey []uint64) (id uint64) {
 }
 
 func AttributeNameAll() (attributeName []*AttributeName) {
-	database.DB.Select("id", "title").Order("sort asc").Find(&attributeName)
+	database.DB.Select("id", "title", "abbr").Order("sort asc").Find(&attributeName)
 	return
 }
 
@@ -104,4 +110,21 @@ func (attributeName *AttributeName) SaveMany(sel []string, permKey []uint64) (id
 func (attributeName *AttributeName) Delete() (rowsAffected int64) {
 	result := database.DB.Delete(&attributeName)
 	return result.RowsAffected
+}
+
+func InitGenre() []map[string]any {
+	return []map[string]any{
+		{
+			"value": sku,
+			"label": "规格",
+		},
+		{
+			"value": item,
+			"label": "属性",
+		},
+		{
+			"value": other,
+			"label": "其他",
+		},
+	}
 }
