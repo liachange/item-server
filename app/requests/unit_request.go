@@ -27,7 +27,7 @@ func UnitCreate(data interface{}, c *gin.Context) map[string][]string {
 		"title":       []string{"required", "min_cn:1", "max_cn:30", "not_exists:categories,title"},
 		"description": []string{"max_cn:255"},
 		"sort":        []string{"numeric_between:1,9999"},
-		"category":    []string{"required"},
+		"category":    []string{"required", "exist_key:格式不正确"},
 	}
 	messages := govalidator.MapData{
 		"state": []string{
@@ -45,6 +45,7 @@ func UnitCreate(data interface{}, c *gin.Context) map[string][]string {
 		},
 		"category": []string{
 			"required:分类必填项",
+			"exist_key:格式不正确",
 		},
 	}
 	return validate(data, rules, messages)
@@ -55,7 +56,7 @@ func UnitSave(data interface{}, c *gin.Context) map[string][]string {
 		"title":       []string{"required", "min_cn:1", "max_cn:30", "not_exists:categories,title," + c.Param("id")},
 		"description": []string{"max_cn:255"},
 		"sort":        []string{"numeric_between:1,9999"},
-		"category":    []string{"required"},
+		"category":    []string{"required", "exist_key:格式不正确"},
 	}
 	messages := govalidator.MapData{
 		"state": []string{
@@ -73,6 +74,7 @@ func UnitSave(data interface{}, c *gin.Context) map[string][]string {
 		},
 		"category": []string{
 			"required:分类必填项",
+			"exist_key:格式不正确",
 		},
 	}
 	return validate(data, rules, messages)

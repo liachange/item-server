@@ -22,7 +22,7 @@ func (ctrl *UnitsController) InitialValue(c *gin.Context) {
 	r := resources.Category{ModelTree: category.TreeCategoryAll()}
 	data := map[string]any{
 		"states":     models.InitState(),
-		"categories": r.TreeIterative(0),
+		"categories": r.CategorySelectResource(),
 	}
 
 	response.Data(c, data)

@@ -17,13 +17,13 @@ type UnitResource struct {
 	IsPublic    uint8          `json:"public"`
 	Title       string         `json:"title"`
 	Sort        uint64         `json:"sort"`
-	Description string         `json:"desc"`
+	Description string         `json:"description"`
 	Categories  []*CategoryHas `json:"categories"`
 	CreatedAt   string         `json:"created_at"`
 	UpdatedAt   string         `json:"updated_at"`
 }
 
-func (p *Unit) ShowResource() (show *UnitResource) {
+func (p *Unit) ShowResource() (show UnitResource) {
 	optimus := optimusPkg.NewOptimus()
 	show.ID = optimus.Encode(p.Model.ID)
 	show.State = p.Model.State
